@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LevelIncreaser : MonoBehaviour {
+public class EAWaveHandler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {

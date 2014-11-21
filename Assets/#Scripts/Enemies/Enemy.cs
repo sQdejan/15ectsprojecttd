@@ -113,6 +113,7 @@ public class Enemy : MonoBehaviour {
 
 		thisTransform.position += direction * moveSpeed * Time.deltaTime;
 	}
+
 	void WalkDirection()
 	{
 		Vector3 dir = waypointsCurrent[curWaypointIndex].position - thisTransform.position;
@@ -129,7 +130,7 @@ public class Enemy : MonoBehaviour {
 	{
 		//0 for left, 1 for right
 		if(waypointPoolToUse == 0) {
-			waypointsCurrent = waypointsRight;
+			waypointsCurrent = waypointsLeft;
 		} else {
 			waypointsCurrent = waypointsLeft;
 		}

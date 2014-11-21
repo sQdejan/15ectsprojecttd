@@ -46,12 +46,13 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\#Scripts\EA\EAEnemy.cs" />
+     <Compile Include="Assets\#Scripts\EA\EATower.cs" />
+     <Compile Include="Assets\#Scripts\EA\EAWaveHandler.cs" />
      <Compile Include="Assets\#Scripts\EA\WaveChromosome.cs" />
      <Compile Include="Assets\#Scripts\EA\WaveHandler.cs" />
      <Compile Include="Assets\#Scripts\Enemies\Enemy.cs" />
-     <Compile Include="Assets\#Scripts\Enemies\EnemyOLD.cs" />
      <Compile Include="Assets\#Scripts\Enemies\EnemySpawner.cs" />
-     <Compile Include="Assets\#Scripts\Enemies\LevelIncreaser.cs" />
      <Compile Include="Assets\#Scripts\Extensions\Vector3Extension.cs" />
      <Compile Include="Assets\#Scripts\Misc\InteractionHandler.cs" />
      <Compile Include="Assets\#Scripts\Towers\Projectile.cs" />
