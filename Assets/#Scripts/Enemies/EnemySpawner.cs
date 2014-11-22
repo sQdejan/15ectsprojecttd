@@ -14,6 +14,8 @@ public class EnemySpawner : MonoBehaviour {
 
 	[HideInInspector]
 	public static int enemiesDone = 0; //Probably not the best idea if more spawners should be available
+	[HideInInspector]
+	public static float totalDamageTaken = 0;
 
 	//Privates
 	private List<Enemy> enemies = new List<Enemy>();
@@ -43,6 +45,7 @@ public class EnemySpawner : MonoBehaviour {
 			if(curWave < waves) {
 				StartCoroutine(WaveWaiting());
 			} else {
+				Debug.Log(EnemySpawner.totalDamageTaken);
 				Debug.Log("Game is over, no more waves!");
 			}
 		}

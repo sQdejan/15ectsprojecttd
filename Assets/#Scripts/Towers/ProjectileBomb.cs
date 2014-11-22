@@ -4,15 +4,15 @@ using System;
 
 public class ProjectileBomb : Projectile {
 
-	public float radius = 1f;
+	public float bombRadius = 1f;
 
 	private Vector3 targetPos;
 	private LayerMask targetLayer;
 
-	public override void Activate (Vector3 position, Transform target, float damage)
+	public override void Activate (Vector3 position, Transform target, float damage, float dotDamage, float slow)
 	{
 		targetLayer = 1 << LayerMask.NameToLayer("Enemy");
-		base.Activate (position, target, damage);
+		base.Activate (position, target, damage, dotDamage, slow);
 		targetPos = target.position;
 	}
 
@@ -44,7 +44,7 @@ public class ProjectileBomb : Projectile {
 
 	void Explode()
 	{
-		Collider2D[] hits = Physics2D.OverlapCircleAll(thisTransform.position.To2DVector(), radius, targetLayer);
+		Collider2D[] hits = Physics2D.OverlapCircleAll(thisTransform.position.To2DVector(), bombRadius, targetLayer);
 
 		if(hits.Length > 0) {
 			Enemy[] enemies = Array.ConvertAll(hits, item => item.gameObject.GetComponent<Enemy>());

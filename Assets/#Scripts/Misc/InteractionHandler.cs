@@ -162,6 +162,8 @@ public class InteractionHandler : MonoBehaviour {
 
 		tmpTower.level++;
 		tmpTower.damage *= 4f;
+		tmpTower.dotDamage *= 4f;
+		tmpTower.slow += 0.1f;
 		tmpTower.curNetWorth += tmpTower.cost;
 		curGold -= tmpTower.cost;
 		tmpTower.cost *= 4f;

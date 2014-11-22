@@ -13,6 +13,8 @@ public class Tower : MonoBehaviour {
 	public float radius = 2.5f;
     public float damage = 0;
 	public float cost = 50;
+	public float dotDamage;
+	public float slow;
 	public bool aimFrontEnemy = false;
 
 	[HideInInspector]
@@ -32,6 +34,8 @@ public class Tower : MonoBehaviour {
 
 	private float startCost;
 	private float startDamage;
+	private float startDotDamage;
+	private float startSlow;
 
 	private GameObject curTarget;
 	private LayerMask targetLayer;
@@ -42,6 +46,8 @@ public class Tower : MonoBehaviour {
 	{
 		startCost = cost;
 		startDamage = damage;
+		startDotDamage = dotDamage;
+		startSlow = slow;
 
 		foreach(Transform t in projectilePool.transform) {
 			projectiles.Add(t.GetComponent<Projectile>());
@@ -107,7 +113,7 @@ public class Tower : MonoBehaviour {
 	{
 		for(int i = 0; i < projectiles.Count; i++) {
 			if(projectiles[i].available) {
-				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage);
+				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage, dotDamage, slow);
 				break;
 			}
 		}
@@ -129,6 +135,8 @@ public class Tower : MonoBehaviour {
 		thisTransform.position = startPosition;
 		cost = startCost;
 		damage = startDamage;
+		dotDamage = startDotDamage;
+		slow = startSlow;
 		level = 1;
 		curNetWorth = 0;
 		RangeIndicator.selected = false;

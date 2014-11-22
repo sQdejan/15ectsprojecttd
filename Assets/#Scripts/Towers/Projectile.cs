@@ -20,6 +20,8 @@ public abstract class Projectile : MonoBehaviour {
 
 	//Protected
 	protected float damage = 1f;
+	protected float dotDamage;
+	protected float slow;
 	protected Transform thisTransform;
 	protected float lastDistance = float.MaxValue;
 	
@@ -46,6 +48,11 @@ public abstract class Projectile : MonoBehaviour {
 
 	void Update()
 	{
+		if(!target.gameObject.activeSelf) {
+			Reset();
+			return;
+		}
+
 		float curDistance = Vector3.Distance(thisTransform.position, target.position);
 
 		if(curDistance < lastDistance) {
@@ -63,19 +70,17 @@ public abstract class Projectile : MonoBehaviour {
 
 		//Move towards target
 		thisTransform.position += direction * travelSpeed * Time.deltaTime;
-
-		if(!target.gameObject.activeSelf) {
-			Reset();
-		}
 	}
 
-	public virtual void Activate(Vector3 position, Transform target, float damage)
+	public virtual void Activate(Vector3 position, Transform target, float damage, float dotDamage, float slow)
 	{
 		gameObject.SetActive(true);
 		thisTransform.position = position;
 		this.target = target;
 		available = false;
 		this.damage = damage;
+		this.dotDamage = dotDamage;
+		this.slow = slow;
 	}
 
 	public void Reset()

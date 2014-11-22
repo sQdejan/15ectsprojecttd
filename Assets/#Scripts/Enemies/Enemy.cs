@@ -44,7 +44,7 @@ public class Enemy : MonoBehaviour {
 
 	private int level = 1;
 	private float curStartHealth;
-	private float curBounty = 0;
+	private float curBounty = 1;
 	private float bountyIncreaser = 1;
 
 #endregion
@@ -114,6 +114,7 @@ public class Enemy : MonoBehaviour {
 		thisTransform.position += direction * moveSpeed * Time.deltaTime;
 	}
 
+	//Calculate in what direction to move at
 	void WalkDirection()
 	{
 		Vector3 dir = waypointsCurrent[curWaypointIndex].position - thisTransform.position;
@@ -132,7 +133,7 @@ public class Enemy : MonoBehaviour {
 		if(waypointPoolToUse == 0) {
 			waypointsCurrent = waypointsLeft;
 		} else {
-			waypointsCurrent = waypointsLeft;
+			waypointsCurrent = waypointsRight;
 		}
 		
 		gameObject.SetActive(true);
@@ -160,10 +161,6 @@ public class Enemy : MonoBehaviour {
 
 	void Bounty()
 	{
-		if(level % 10 == 0) {
-			bountyIncreaser *= 1.5f;
-		}
-		curBounty += bountyIncreaser;
 		InteractionHandler.curGold += curBounty;
 	}
 
@@ -181,6 +178,11 @@ public class Enemy : MonoBehaviour {
 	public void LevelUp()
 	{
 		level++;
+
+		if(level % 10 == 0) {
+			bountyIncreaser *= 1.5f;
+		}
+		curBounty += bountyIncreaser;
 
 		if(level % PRILVL == 0) {
 			poisonResistance += PRI;
@@ -255,7 +257,11 @@ public class Enemy : MonoBehaviour {
 		}
 
 		//Take armor into account
-		health -= damage * (1 - ((armor * 0.06f) / (1f + armor * 0.06f)));
+		damage *= 1f - ((armor * 0.06f) / (1f + armor * 0.06f));
+		WaveHandler.totalDamageTaken += damage;
+		health -= damage;
+
+
 
 		if(health <= 0) {
 			Bounty();
@@ -278,13 +284,14 @@ public class Enemy : MonoBehaviour {
 			moveSpeed = startMoveSpeed;
 			StartCoroutine("SlowRoutine", slow);
 		}
-
 	}
 
 	IEnumerator DoTRoutine(float dotDamage)
 	{
 		for(int i = 0; i < 5; i++) {
-			health -= dotDamage * (1 - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f)));
+			dotDamage *= 1f - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f));
+			health -= dotDamage;
+			WaveHandler.totalDamageTaken += dotDamage;
 			if(health <= 0) {
 				Bounty();
 				Terminate();

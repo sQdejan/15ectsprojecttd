@@ -4,57 +4,112 @@ using System.Collections.Generic;
 
 public class EAEnemy : MonoBehaviour {
 
-	public float moveSpeed;
-	public float timeInterval;
-	public Transform waypointsPool;
+#region variables
+
+	//Publics
+	public Transform waypointsPoolRight;
+	public Transform waypointsPoolLeft;
+	public float moveSpeed = 0.7f; 
+	public float health = 0;
+	public float healthIncreaser = 10;
+	public float poisonResistance = 0;	
+	public float slowResistance = 0;	
+	public float armor = 0;				
 	public ArmorType armorType;
-	public float health = 100;
 
-	private float time = 0;
+	[HideInInspector]
+	public int waypointPoolToUse = 0; //0 for left, 1 for right
+
+	//Privates
 	private Transform thisTransform;
+	private float startMoveSpeed;
 
-	private List<Transform> waypoints = new List<Transform>();
+	private List<Transform> waypointsLeft = new List<Transform>();
+	private List<Transform> waypointsRight = new List<Transform>();
+	private List<Transform> waypointsCurrent;
 	private int curWaypointIndex = 0;
 	private Vector3 direction;
-	private float startTime;
+
+	private float travelTime = 0;
+
+#endregion
+
+#region Accessors
+
+	public float TravelTime
+	{
+		get {
+			return travelTime;
+		}
+	}
+
+#endregion
 
 	void Start()
 	{
-		startTime = Time.realtimeSinceStartup;
-//		Time.timeScale = 100;
 		thisTransform = transform;
+		startMoveSpeed = moveSpeed;
 
-		foreach(Transform t in waypointsPool) {
-			waypoints.Add(t);
+		foreach(Transform t in waypointsPoolLeft) { waypointsLeft.Add(t); }
+		foreach(Transform t in waypointsPoolRight) { waypointsRight.Add(t); }
+
+		gameObject.SetActive(false);
+	}
+
+	//What is special about this enemy is the way I move it compared to the "original" enemy.
+	//I move it stepwise here not using time to smoothen the movement. This will give me more
+	//correct movement when speeding up the process.
+	void Update () {
+
+		if(Vector3.Distance(waypointsCurrent[curWaypointIndex].position, thisTransform.position) < startMoveSpeed / 2) {
+			if(++curWaypointIndex >= waypointsCurrent.Count) {
+				Terminate();
+				return;
+			}
+			WalkDirection();
 		}
 
-		thisTransform.position = waypoints[curWaypointIndex++].position;
-		WalkDirection();
+		thisTransform.position += direction * moveSpeed;
+		travelTime += moveSpeed;
 	}
 
-	// Update is called once per frame
-	void Update () {
-//		Debug.Log(startTime);
-//		if(time < timeInterval) {
-//			time += Time.deltaTime;
-//		} else {
-			if(Vector3.Distance(waypoints[curWaypointIndex].position, thisTransform.position) < moveSpeed / 2) {
-				curWaypointIndex++;
-				Debug.Log(curWaypointIndex + " " + (Time.realtimeSinceStartup - startTime));
-				WalkDirection();
-			}
-//			time = 0;
-			thisTransform.position += direction * moveSpeed;
-//		}
-	}
-
+	//Calculate in what direction to move at
 	void WalkDirection()
 	{
-		Vector3 dir = waypoints[curWaypointIndex].position - thisTransform.position;
+		Vector3 dir = waypointsCurrent[curWaypointIndex].position - thisTransform.position;
 		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 		thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-		direction = (waypoints[curWaypointIndex].position - thisTransform.position).normalized;
+		direction = (waypointsCurrent[curWaypointIndex].position - thisTransform.position).normalized;
 	}
+
+	public void Spawn()
+	{
+		//0 for left, 1 for right
+		if(waypointPoolToUse == 0) {
+			waypointsCurrent = waypointsLeft;
+		} else {
+			waypointsCurrent = waypointsRight;
+		}
+		
+		gameObject.SetActive(true);
+		thisTransform.position = waypointsCurrent[curWaypointIndex++].position;
+		WalkDirection();
+	}
+	
+	void Terminate()
+	{
+		travelTime = 0;
+		curWaypointIndex = 0;
+		moveSpeed = startMoveSpeed;
+		
+		StopCoroutine("SlowRoutine");
+		StopCoroutine("DoTRoutine");
+		EAWaveHandler.enemiesDone++;
+		
+		gameObject.SetActive(false);
+	}
+
+#region Damage related
 
 	public void TakeDamage(float damage, AttackType at)
 	{
@@ -97,13 +152,54 @@ public class EAEnemy : MonoBehaviour {
 		}
 		
 		//Take armor into account
-//		health -= damage * (1 - ((armor * 0.06f) / (1f + armor * 0.06f)));
-
+		damage *= 1 - ((armor * 0.06f) / (1f + armor * 0.06f));
 		health -= damage;
 
-//		if(health <= 0) {
-//			Bounty();
-//			Terminate();
-//		}
+		EAWaveHandler.totalDamageTaken += damage;
+
+		if(health <= 0) {
+			Terminate();
+		}
 	}
+
+	public void ApplyDoT(float dotDamage)
+	{
+		if(gameObject.activeSelf){
+			StopCoroutine("DoTRoutine");
+			StartCoroutine("DoTRoutine", dotDamage);
+		}
+	}
+	
+	public void ApplySlow(float slow)
+	{	
+		if(gameObject.activeSelf) {
+			StopCoroutine("SlowRoutine");
+			moveSpeed = startMoveSpeed;
+			StartCoroutine("SlowRoutine", slow);
+		}
+	}
+
+	//I yield null because it will go fast and no pauses is needed - the null will skip a frame so it is needed
+	IEnumerator DoTRoutine(float dotDamage)
+	{
+		for(int i = 0; i < 5; i++) {
+			dotDamage *= 1f - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f));
+			health -= dotDamage;
+			EAWaveHandler.totalDamageTaken += dotDamage;
+			if(health <= 0) {
+				Terminate();
+			}
+			yield return null;
+		}
+	}
+
+	//I yield null because it will go fast and no pauses is needed - the null will skip a frame so it is needed
+	IEnumerator SlowRoutine(float slow)
+	{
+		moveSpeed *= slow * (1 - slowResistance);
+		yield return null;
+		moveSpeed = startMoveSpeed;
+	}
+
+#endregion
 }

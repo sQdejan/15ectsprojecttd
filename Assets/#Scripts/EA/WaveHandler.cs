@@ -20,7 +20,9 @@ public class WaveHandler : MonoBehaviour {
 	public static int enemiesDone = 0; //Probably not the best idea if more spawners should be available <-- IS fixed
 	[HideInInspector]
 	public static float totalTravelTime = 0; //Used for setting the fitness
-	
+	[HideInInspector]
+	public static float totalDamageTaken = 0; //Used for setting the fitness
+
 	//Privates
 	private List<Enemy> warriors = new List<Enemy>();
 	private List<Enemy> mages = new List<Enemy>();
@@ -62,18 +64,17 @@ public class WaveHandler : MonoBehaviour {
 			//Read the total travel time for fitness
 			population[curWave++].fitness = totalTravelTime;
 			WaveHandler.totalTravelTime = 0;
-
 			enemiesDone = 0;
 			Debug.Log("Wave " + (curWave) + " is over");
 			if(curWave < waves) {
 				StartCoroutine("WaveWaiting");
-			} else {
+			}/* else {
 				Debug.Log("Game is over, no more waves!");
 
 				for(int i = 0; i < population.Length; i++) {
 					Debug.Log (population[i].fitness);
 				}
-			}
+			}*/
 		}
 	}
 
