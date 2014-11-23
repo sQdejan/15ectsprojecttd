@@ -144,7 +144,6 @@ public class Enemy : MonoBehaviour {
 	//When enemy is dead or reached goal reset the stats
 	void Terminate()
 	{
-		WaveHandler.totalTravelTime += travelTime; //Used for total fitness of wave
 		WaveHandler.enemiesDone++; //For updating when the last enemy has died == wave over
 
 		travelTime = 0;
@@ -258,7 +257,6 @@ public class Enemy : MonoBehaviour {
 
 		//Take armor into account
 		damage *= 1f - ((armor * 0.06f) / (1f + armor * 0.06f));
-		WaveHandler.totalDamageTaken += damage;
 		health -= damage;
 
 
@@ -291,7 +289,6 @@ public class Enemy : MonoBehaviour {
 		for(int i = 0; i < 5; i++) {
 			dotDamage *= 1f - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f));
 			health -= dotDamage;
-			WaveHandler.totalDamageTaken += dotDamage;
 			if(health <= 0) {
 				Bounty();
 				Terminate();

@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+public enum TowerType {Arrow, Poison, Frost, Bomb};
+
 public class Tower : MonoBehaviour { 
 
 #region Variables
@@ -16,6 +18,7 @@ public class Tower : MonoBehaviour {
 	public float dotDamage;
 	public float slow;
 	public bool aimFrontEnemy = false;
+	public TowerType towerType;
 
 	[HideInInspector]
 	public bool available = true; //If the tower is free to be build

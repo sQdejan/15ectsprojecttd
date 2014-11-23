@@ -16,6 +16,12 @@ public class EAEnemy : MonoBehaviour {
 	public float slowResistance = 0;	
 	public float armor = 0;				
 	public ArmorType armorType;
+	public float PRI; //Poison Resistance Increase
+	public float SRI; //Slow
+	public float ARI; //Armor
+	public int PRILVL; //After what level should it increase
+	public int SRILVL;
+	public int ARILVL;
 
 	[HideInInspector]
 	public int waypointPoolToUse = 0; //0 for left, 1 for right
@@ -23,6 +29,7 @@ public class EAEnemy : MonoBehaviour {
 	//Privates
 	private Transform thisTransform;
 	private float startMoveSpeed;
+	private float startHealth;
 
 	private List<Transform> waypointsLeft = new List<Transform>();
 	private List<Transform> waypointsRight = new List<Transform>();
@@ -31,6 +38,7 @@ public class EAEnemy : MonoBehaviour {
 	private Vector3 direction;
 
 	private float travelTime = 0;
+	private int level = 1;
 
 #endregion
 
@@ -45,10 +53,11 @@ public class EAEnemy : MonoBehaviour {
 
 #endregion
 
-	void Start()
+	void Awake()
 	{
 		thisTransform = transform;
 		startMoveSpeed = moveSpeed;
+		startHealth = health;
 
 		foreach(Transform t in waypointsPoolLeft) { waypointsLeft.Add(t); }
 		foreach(Transform t in waypointsPoolRight) { waypointsRight.Add(t); }
@@ -82,6 +91,8 @@ public class EAEnemy : MonoBehaviour {
 		direction = (waypointsCurrent[curWaypointIndex].position - thisTransform.position).normalized;
 	}
 
+#region Miscellaneous
+
 	public void Spawn()
 	{
 		//0 for left, 1 for right
@@ -98,16 +109,52 @@ public class EAEnemy : MonoBehaviour {
 	
 	void Terminate()
 	{
+		EAWaveHandler.totalTravelTime += travelTime;
+
 		travelTime = 0;
 		curWaypointIndex = 0;
+		health = startHealth;
 		moveSpeed = startMoveSpeed;
 		
 		StopCoroutine("SlowRoutine");
 		StopCoroutine("DoTRoutine");
 		EAWaveHandler.enemiesDone++;
-		
+
 		gameObject.SetActive(false);
 	}
+
+	void UpdateHealth()
+	{
+		startHealth += healthIncreaser;
+		//For every 4th lvl
+		if(level % 4 == 0) {
+			healthIncreaser *= 1.5f;
+		} 
+
+		health = startHealth;
+	}
+	
+	//Will be called from WaveHandler.cs after each wave has finished
+	public void LevelUp()
+	{
+		level++;
+		
+		if(level % PRILVL == 0) {
+			poisonResistance += PRI;
+		}
+		
+		if(level % SRILVL == 0) {
+			slowResistance += SRI;
+		}
+		
+		if(level % ARILVL == 0) {
+			armor += ARI;
+		}
+		
+		UpdateHealth();
+	}
+
+#endregion
 
 #region Damage related
 
@@ -155,9 +202,13 @@ public class EAEnemy : MonoBehaviour {
 		damage *= 1 - ((armor * 0.06f) / (1f + armor * 0.06f));
 		health -= damage;
 
+//		Debug.Log("Damage is " + damage + " and total damage before is " + EAWaveHandler.totalDamageTaken);
 		EAWaveHandler.totalDamageTaken += damage;
 
 		if(health <= 0) {
+//			Debug.Log("Total damage before " + EAWaveHandler.totalDamageTaken + " health " + health);
+			EAWaveHandler.totalDamageTaken += health;
+//			Debug.Log("Total damage after " + EAWaveHandler.totalDamageTaken);
 			Terminate();
 		}
 	}
@@ -202,4 +253,5 @@ public class EAEnemy : MonoBehaviour {
 	}
 
 #endregion
+	
 }

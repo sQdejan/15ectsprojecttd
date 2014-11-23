@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-
-
 public class InteractionHandler : MonoBehaviour {
 
 #region Variables
@@ -19,12 +17,10 @@ public class InteractionHandler : MonoBehaviour {
 	public LayerMask layersToHit; //For the unit selection interaction
 	public float startGold = 250;
 
-	[HideInInspector]
 	public static float curGold = 100;
-	[HideInInspector]
 	public static int lifesRemaining = 50;
-	[HideInInspector]
 	public static bool gameOver = false;
+	public static List<Tower> currentTowers = new List<Tower>();
 
 	public delegate void GameOver();
 	public static GameOver dGameOver; //Used for functions that needs to be called if game is over.
@@ -149,6 +145,8 @@ public class InteractionHandler : MonoBehaviour {
 		curGold -= tmpTower.cost;
 		tmpTower.cost *= 4f;
 
+		currentTowers.Add(tmpTower);
+
 		RangeIndicator.selected = false;
 		lastTileHit.SetActive(false);
 		curTower = null;
@@ -245,7 +243,9 @@ public class InteractionHandler : MonoBehaviour {
 
 			if(GUI.Button(new Rect(up.x - width / 2, Screen.height - up.y + (offSetY - height), width, height), "Sell Tower")) {
 				Tower tmpTower = curSelectedTower.GetComponent<Tower>();
-				
+
+				currentTowers.Remove(tmpTower);
+
 				curGold += (float)tmpTower.curNetWorth * 0.75f;
 				tmpTower.ResetTower();
 				curSelectedTower = null;

@@ -2,8 +2,6 @@
 using System.Collections;
 using System;
 
-public enum TowerType {Arrow, Poison, Frost, Bomb};
-
 public class EATower : MonoBehaviour {
 
 #region Variables
@@ -18,7 +16,6 @@ public class EATower : MonoBehaviour {
 	public float dotDamage;
 	public float slow;
 	public LayerMask targetLayer;
-	public TowerType towerType;
 	public bool aimFrontEnemy;
 
 	//Privates
@@ -36,8 +33,12 @@ public class EATower : MonoBehaviour {
 	{
 		thisTransform = transform;
 
-		//Setting the corresponding attacktype and adding the correct method to the delegate
-		switch (towerType) {
+		gameObject.SetActive(false);
+	}
+
+	public void Initialize(TowerType tp) 
+	{
+		switch (tp) {
 		case TowerType.Arrow:
 			shootingMethod = ArrowShooting;
 			attackType = AttackType.PiercingAttack;

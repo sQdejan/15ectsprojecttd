@@ -48,8 +48,8 @@
   <ItemGroup>
      <Compile Include="Assets\#Scripts\EA\EAEnemy.cs" />
      <Compile Include="Assets\#Scripts\EA\EATower.cs" />
+     <Compile Include="Assets\#Scripts\EA\EAWaveGenome.cs" />
      <Compile Include="Assets\#Scripts\EA\EAWaveHandler.cs" />
-     <Compile Include="Assets\#Scripts\EA\WaveChromosome.cs" />
      <Compile Include="Assets\#Scripts\EA\WaveHandler.cs" />
      <Compile Include="Assets\#Scripts\Enemies\Enemy.cs" />
      <Compile Include="Assets\#Scripts\Enemies\EnemySpawner.cs" />

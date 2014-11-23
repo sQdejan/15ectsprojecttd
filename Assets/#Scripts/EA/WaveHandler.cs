@@ -16,12 +16,8 @@ public class WaveHandler : MonoBehaviour {
 	public float timeBetweenWaves = 15f;
 	public float spawnTimeBetweenEnemies = 0.5f;
 	
-	[HideInInspector]
-	public static int enemiesDone = 0; //Probably not the best idea if more spawners should be available <-- IS fixed
-	[HideInInspector]
-	public static float totalTravelTime = 0; //Used for setting the fitness
-	[HideInInspector]
-	public static float totalDamageTaken = 0; //Used for setting the fitness
+	public static int enemiesDone = 0; 
+	public static EAWaveGenome genome;
 
 	//Privates
 	private List<Enemy> warriors = new List<Enemy>();
@@ -32,19 +28,11 @@ public class WaveHandler : MonoBehaviour {
 	private List<Enemy> rightWave;
 	private int curWave = 0;
 
-	//EA Related
-	const int SIZE_OF_POPULATION = 6;
-	private WaveChromosome[] population = new WaveChromosome[SIZE_OF_POPULATION]; 
-
 #endregion
 	
 	void Start()
 	{
 		InteractionHandler.dGameOver += StopGame; //Adding StopGame() to GameOver delegate
-
-		for(int i = 0; i < SIZE_OF_POPULATION; i++) {
-			population[i] = new WaveChromosome(waveSize);
-		}
 
 		foreach(Transform t in warriorPool.transform) { warriors.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in magePool.transform) { mages.Add(t.GetComponent<Enemy>()); }
@@ -61,20 +49,12 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		if(enemiesDone >= waveSize) {
-			//Read the total travel time for fitness
-			population[curWave++].fitness = totalTravelTime;
-			WaveHandler.totalTravelTime = 0;
 			enemiesDone = 0;
 			Debug.Log("Wave " + (curWave) + " is over");
-			if(curWave < waves) {
+			if(++curWave <= waves) {
+				EAWaveHandler.Instance.StartEAProcess(); //Remember something here like waiting with starting before EA process is over
 				StartCoroutine("WaveWaiting");
-			}/* else {
-				Debug.Log("Game is over, no more waves!");
-
-				for(int i = 0; i < population.Length; i++) {
-					Debug.Log (population[i].fitness);
-				}
-			}*/
+			}
 		}
 	}
 
@@ -94,7 +74,7 @@ public class WaveHandler : MonoBehaviour {
 
 	IEnumerator SpawnWaves()
 	{
-		ReadGene();
+		ReadChromosome();
 
 		bool shouldContinue = true;
 		int leftLength = leftWave.Count;
@@ -151,80 +131,83 @@ public class WaveHandler : MonoBehaviour {
 		
 	}
 	
-	void ReadGene()
+	void ReadChromosome()
 	{
 		rightWave = new List<Enemy>();
 		leftWave = new List<Enemy>();
 
-		int amountOfWarriors = population[curWave].Chromosome[0];
-		int amountOfMages = population[curWave].Chromosome[1];
-		int amountOfRogues = population[curWave].Chromosome[2];
-		int amountOfMonks = population[curWave].Chromosome[3];
+		int orderWarrior = genome.Chromosome[0];
+		int orderMages = genome.Chromosome[1];
+		int orderRogues = genome.Chromosome[2];
+		int orderMonks = genome.Chromosome[3];
 
-		int splitWarriors = population[curWave].Chromosome[4];
-		int splitMages = population[curWave].Chromosome[5];
-		int splitRogues = population[curWave].Chromosome[6];
-		int splitMonks = population[curWave].Chromosome[7];
+		int amountOfWarriors = genome.Chromosome[4];
+		int amountOfMages = genome.Chromosome[5];
+		int amountOfRogues = genome.Chromosome[6];
+		int amountOfMonks = genome.Chromosome[7];
 
-		//The for-loops does not start from 1 so this is needed for the splitting
-		int curIndex = 1;
+		int splitWarriors = genome.Chromosome[8];
+		int splitMages = genome.Chromosome[9];
+		int splitRogues = genome.Chromosome[10];
+		int splitMonks = genome.Chromosome[11];
 
 		int warriorsLeft = (int)((float)amountOfWarriors / 100 * splitWarriors + 0.5f);
 		int magesLeft = (int)((float)amountOfMages / 100 * splitMages + 0.5f);
 		int roguesLeft = (int)((float)amountOfRogues / 100 * splitRogues + 0.5f);
 		int monksLeft = (int)((float)amountOfMonks / 100 * splitMonks + 0.5f);
 
-		//Warriors
-		for(int i = 0; i < amountOfWarriors; i++) { 
-			if(curIndex <= warriorsLeft) {
-				leftWave.Add(warriors[i]);
-				warriors[i].waypointPoolToUse = 0;
-			} else {
-				rightWave.Add(warriors[i]);
-				warriors[i].waypointPoolToUse = 1;
-			}
-			curIndex++;
-		}
-		curIndex = 1;
+		int tmpIndex = 1;
 
-		//Mages
-		for(int i = amountOfWarriors; i < amountOfWarriors + amountOfMages; i++) { 
-			if(curIndex <= magesLeft) {
-				leftWave.Add(mages[i]);
-				mages[i].waypointPoolToUse = 0;
-			} else {
-				rightWave.Add(mages[i]);
-				mages[i].waypointPoolToUse = 1;
-			}
-			curIndex++;
-		}
-		curIndex = 1;
+		while(tmpIndex <= 4) {
 
-		//Rogues
-		for(int i = amountOfWarriors + amountOfMages; i < amountOfWarriors + amountOfMages + amountOfRogues; i++) { 
-			if(curIndex <= roguesLeft) {
-				leftWave.Add(rogues[i]);
-				rogues[i].waypointPoolToUse = 0;
-			} else {
-				rightWave.Add(rogues[i]);
-				rogues[i].waypointPoolToUse = 1;
+			if(orderWarrior == tmpIndex) {
+//				Debug.Log("With index " + tmpIndex + " I send warriors and " + warriorsLeft + " warriors go left");
+				for(int i = 0; i < amountOfWarriors; i++) { 
+					if(i < warriorsLeft) {
+						leftWave.Add(warriors[i]);
+						warriors[i].waypointPoolToUse = 0;
+					} else {
+						rightWave.Add(warriors[i]);
+						warriors[i].waypointPoolToUse = 1;
+					}
+				}
+			} else if (orderMages == tmpIndex) {
+//				Debug.Log("With index " + tmpIndex + " I send mages and " + magesLeft + " mages go left");
+				for(int i = 0; i < amountOfMages; i++) { 
+					if(i < magesLeft) {
+						leftWave.Add(mages[i]);
+						mages[i].waypointPoolToUse = 0;
+					} else {
+						rightWave.Add(mages[i]);
+						mages[i].waypointPoolToUse = 1;
+					}
+				}
+			} else if (orderRogues == tmpIndex) {
+//				Debug.Log("With index " + tmpIndex + " I send rogues and " + roguesLeft + " rogues go left");
+				for(int i = 0; i < amountOfRogues; i++) { 
+					if(i < roguesLeft) {
+						leftWave.Add(rogues[i]);
+						rogues[i].waypointPoolToUse = 0;
+					} else {
+						rightWave.Add(rogues[i]);
+						rogues[i].waypointPoolToUse = 1;
+					}
+				}
+			} else if (orderMonks == tmpIndex) {
+//				Debug.Log("With index " + tmpIndex + " I send monks and " + monksLeft + " monks go left");
+				for(int i = 0; i < amountOfMonks; i++) { 
+					if(i < monksLeft) {
+						leftWave.Add(monks[i]);
+						monks[i].waypointPoolToUse = 0;
+					} else {
+						rightWave.Add(monks[i]);
+						monks[i].waypointPoolToUse = 1;
+					}
+				}
 			}
-			curIndex++;
-		}
-		curIndex = 1;
 
-		//Rogues
-		for(int i = amountOfWarriors + amountOfMages + amountOfRogues; i < amountOfWarriors + amountOfMages + amountOfRogues + amountOfMonks; i++) { 
-			if(curIndex <= monksLeft) {
-				leftWave.Add(monks[i]);
-				monks[i].waypointPoolToUse = 0;
-			} else {
-				rightWave.Add(monks[i]);
-				monks[i].waypointPoolToUse = 1;
-			}
-			curIndex++;
+			tmpIndex++;
 		}
-
 	}
 
 #endregion
