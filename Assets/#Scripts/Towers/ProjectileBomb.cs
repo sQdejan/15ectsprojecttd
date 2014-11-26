@@ -17,7 +17,7 @@ public class ProjectileBomb : Projectile {
 	}
 
 	//Overriding the Update function in the parent class, this one not seeking the enemy but a location.
-	void Update()
+	void FixedUpdate()
 	{
 //		Debug.DrawLine(thisTransform.position, thisTransform.position + Vector3.up * radius);
 //		Debug.DrawLine(thisTransform.position, thisTransform.position - Vector3.up * radius);
@@ -31,7 +31,7 @@ public class ProjectileBomb : Projectile {
 		thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 		
 		//Move towards target
-		thisTransform.position += direction * travelSpeed * Time.deltaTime;
+		thisTransform.position += direction * travelSpeed * Time.fixedDeltaTime;
 
 		float curDistance = Vector3.Distance(targetPos, thisTransform.position);
 

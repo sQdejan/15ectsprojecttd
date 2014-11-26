@@ -46,7 +46,7 @@ public abstract class Projectile : MonoBehaviour {
 		thisTransform = transform;
 	}
 
-	void Update()
+	void FixedUpdate()
 	{
 		if(!target.gameObject.activeSelf) {
 			Reset();
@@ -69,7 +69,7 @@ public abstract class Projectile : MonoBehaviour {
 		thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
 		//Move towards target
-		thisTransform.position += direction * travelSpeed * Time.deltaTime;
+		thisTransform.position += direction * travelSpeed * Time.fixedDeltaTime;
 	}
 
 	public virtual void Activate(Vector3 position, Transform target, float damage, float dotDamage, float slow)

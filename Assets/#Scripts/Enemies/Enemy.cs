@@ -82,7 +82,7 @@ public class Enemy : MonoBehaviour {
 
 #region Move Related
 
-	void Update()
+	void FixedUpdate()
 	{
 		Move();
 		travelTime += moveSpeed;
@@ -111,7 +111,7 @@ public class Enemy : MonoBehaviour {
 			lastDistance = curDistance;
 		}
 
-		thisTransform.position += direction * moveSpeed * Time.deltaTime;
+		thisTransform.position += direction * moveSpeed * Time.fixedDeltaTime;
 	}
 
 	//Calculate in what direction to move at
@@ -293,14 +293,27 @@ public class Enemy : MonoBehaviour {
 				Bounty();
 				Terminate();
 			}
-			yield return new WaitForSeconds(1f);
+//			yield return new WaitForSeconds(1f);
+
+			float time = 0;
+
+			while(time < 1) {
+				time += Time.fixedDeltaTime;
+				yield return new WaitForFixedUpdate();
+			}
 		}
 	}
 	
 	IEnumerator SlowRoutine(float slow)
 	{
 		moveSpeed *= slow * (1 - slowResistance);
-		yield return new WaitForSeconds(5f);
+//		yield return new WaitForSeconds(5f);
+		float time = 0;
+		
+		while(time < 5) {
+			time += Time.fixedDeltaTime;
+			yield return new WaitForFixedUpdate();
+		}
 		moveSpeed = startMoveSpeed;
 	}
 

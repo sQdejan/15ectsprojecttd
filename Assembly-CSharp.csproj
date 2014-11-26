@@ -55,6 +55,7 @@
      <Compile Include="Assets\#Scripts\Enemies\EnemySpawner.cs" />
      <Compile Include="Assets\#Scripts\Extensions\Vector3Extension.cs" />
      <Compile Include="Assets\#Scripts\Misc\InteractionHandler.cs" />
+     <Compile Include="Assets\#Scripts\Misc\Test.cs" />
      <Compile Include="Assets\#Scripts\Towers\Projectile.cs" />
      <Compile Include="Assets\#Scripts\Towers\ProjectileArrow.cs" />
      <Compile Include="Assets\#Scripts\Towers\ProjectileBomb.cs" />

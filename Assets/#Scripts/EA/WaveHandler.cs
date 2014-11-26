@@ -38,17 +38,20 @@ public class WaveHandler : MonoBehaviour {
 		foreach(Transform t in magePool.transform) { mages.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in roguePool.transform) { rogues.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in monkPool.transform) { monks.Add(t.GetComponent<Enemy>()); }
-		
+
+//		Time.timeScale = 2;
+
 		StartCoroutine("FirstWave");
 	}
 	
-	void Update()
+	void FixedUpdate()
 	{
 		if(InteractionHandler.gameOver){
 			return;
 		}
 
 		if(enemiesDone >= waveSize) {
+			Time.timeScale = 5;
 			enemiesDone = 0;
 			Debug.Log("Wave " + (curWave) + " is over");
 			if(++curWave <= waves) {
@@ -96,7 +99,12 @@ public class WaveHandler : MonoBehaviour {
 				shouldContinue = true;
 			}
 
-			yield return new WaitForSeconds(spawnTimeBetweenEnemies);
+			float time = 0;
+
+			while(time < spawnTimeBetweenEnemies) {
+				time += Time.fixedDeltaTime;
+				yield return new WaitForFixedUpdate();
+			}
 		}
 	}
 	
@@ -107,14 +115,24 @@ public class WaveHandler : MonoBehaviour {
 		foreach(Enemy e in rogues) { e.LevelUp(); }
 		foreach(Enemy e in monks) { e.LevelUp(); }
 
-		yield return new WaitForSeconds(timeBetweenWaves);
+		float time = 0;
+		
+		while(time < timeBetweenWaves) {
+			time += Time.fixedDeltaTime;
+			yield return new WaitForFixedUpdate();
+		}
 		
 		StartCoroutine("SpawnWaves");
 	}
 
 	IEnumerator FirstWave()
 	{
-		yield return new WaitForSeconds(timeBetweenWaves);
+		float time = 0;
+		
+		while(time < timeBetweenWaves) {
+			time += Time.fixedDeltaTime;
+			yield return new WaitForFixedUpdate();
+		}
 
 		StartCoroutine("SpawnWaves");
 	}

@@ -61,7 +61,7 @@ public class Tower : MonoBehaviour {
 		targetLayer = 1 << LayerMask.NameToLayer("Enemy");
 	}
 
-	void Update()
+	void FixedUpdate()
 	{
 //		Debug.DrawLine(thisTransform.position, thisTransform.position + Vector3.up * radius);
 //		Debug.DrawLine(thisTransform.position, thisTransform.position - Vector3.up * radius);
@@ -127,7 +127,15 @@ public class Tower : MonoBehaviour {
 	IEnumerator FireRateCoolDown()
 	{
 		canShoot = false;
-		yield return new WaitForSeconds(fireRateCoolDown);
+//		yield return new WaitForSeconds(fireRateCoolDown);
+
+		float time = 0;
+		
+		while(time < fireRateCoolDown) {
+			time += Time.fixedDeltaTime;
+			yield return new WaitForFixedUpdate();
+		}
+
 		canShoot = true;
 	}
 

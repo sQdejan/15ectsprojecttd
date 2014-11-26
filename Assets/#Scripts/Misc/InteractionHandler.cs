@@ -68,7 +68,7 @@ public class InteractionHandler : MonoBehaviour {
 		frostTowerCost = frostTowers[0].cost;
 	}
 
-	void Update () 
+	void FixedUpdate () 
 	{
 		if(isBuilding) {
 			TowerBuildingInteraction();

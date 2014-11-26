@@ -1,6 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/#Scripts/EA/EAWaveHandler.cs">
+    <Files>
+      <File FileName="Assets/#Scripts/EA/WaveHandler.cs" Line="30" Column="2" />
+      <File FileName="Assets/#Scripts/EA/EAWaveHandler.cs" Line="136" Column="52" />
+      <File FileName="Assets/#Scripts/Enemies/Enemy.cs" Line="148" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

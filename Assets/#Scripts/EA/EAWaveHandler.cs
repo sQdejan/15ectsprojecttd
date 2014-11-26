@@ -77,7 +77,7 @@ public class EAWaveHandler : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 		//Create the wave flow
 
 		if(enemiesDone >= waveSize) {
