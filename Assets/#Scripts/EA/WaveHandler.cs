@@ -18,6 +18,7 @@ public class WaveHandler : MonoBehaviour {
 	
 	public static int enemiesDone = 0; 
 	public static EAWaveGenome genome;
+	public static float totalDamage = 0;
 
 	//Privates
 	private List<Enemy> warriors = new List<Enemy>();
@@ -39,8 +40,6 @@ public class WaveHandler : MonoBehaviour {
 		foreach(Transform t in roguePool.transform) { rogues.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in monkPool.transform) { monks.Add(t.GetComponent<Enemy>()); }
 
-//		Time.timeScale = 2;
-
 		StartCoroutine("FirstWave");
 	}
 	
@@ -51,12 +50,18 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		if(enemiesDone >= waveSize) {
-			Time.timeScale = 5;
 			enemiesDone = 0;
 			Debug.Log("Wave " + (curWave) + " is over");
 			if(++curWave <= waves) {
-				EAWaveHandler.Instance.StartEAProcess(); //Remember something here like waiting with starting before EA process is over
 				StartCoroutine("WaveWaiting");
+				Debug.Log("Damage Taken Normal " + totalDamage);
+
+//				foreach(Enemy e in warriors) { e.LevelUp(); }
+//				foreach(Enemy e in mages) { e.LevelUp(); }
+//				foreach(Enemy e in rogues) { e.LevelUp(); }
+//				foreach(Enemy e in monks) { e.LevelUp(); }
+
+				EAWaveHandler.Instance.StartEAProcess();
 			}
 		}
 	}
@@ -90,12 +95,12 @@ public class WaveHandler : MonoBehaviour {
 			shouldContinue = false;
 
 			if(lIndex < leftLength) {
-				leftWave[lIndex++].Spawn();
+				leftWave[lIndex++].Spawn(false);
 				shouldContinue = true;
 			}
 
 			if(rIndex < rightLength) {
-				rightWave[rIndex++].Spawn();
+				rightWave[rIndex++].Spawn(false);
 				shouldContinue = true;
 			}
 
@@ -110,14 +115,9 @@ public class WaveHandler : MonoBehaviour {
 	
 	IEnumerator WaveWaiting()
 	{
-		foreach(Enemy e in warriors) { e.LevelUp(); }
-		foreach(Enemy e in mages) { e.LevelUp(); }
-		foreach(Enemy e in rogues) { e.LevelUp(); }
-		foreach(Enemy e in monks) { e.LevelUp(); }
-
 		float time = 0;
 		
-		while(time < timeBetweenWaves) {
+		while(time < (timeBetweenWaves + 50) * 100) {
 			time += Time.fixedDeltaTime;
 			yield return new WaitForFixedUpdate();
 		}
@@ -177,50 +177,35 @@ public class WaveHandler : MonoBehaviour {
 		int tmpIndex = 1;
 
 		while(tmpIndex <= 4) {
+			int goingLeft = 0;
+			int amountOfEnemies = 0;
+			List<Enemy> curEnemyList = new List<Enemy>();
 
-			if(orderWarrior == tmpIndex) {
-//				Debug.Log("With index " + tmpIndex + " I send warriors and " + warriorsLeft + " warriors go left");
-				for(int i = 0; i < amountOfWarriors; i++) { 
-					if(i < warriorsLeft) {
-						leftWave.Add(warriors[i]);
-						warriors[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(warriors[i]);
-						warriors[i].waypointPoolToUse = 1;
-					}
-				}
-			} else if (orderMages == tmpIndex) {
-//				Debug.Log("With index " + tmpIndex + " I send mages and " + magesLeft + " mages go left");
-				for(int i = 0; i < amountOfMages; i++) { 
-					if(i < magesLeft) {
-						leftWave.Add(mages[i]);
-						mages[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(mages[i]);
-						mages[i].waypointPoolToUse = 1;
-					}
-				}
-			} else if (orderRogues == tmpIndex) {
-//				Debug.Log("With index " + tmpIndex + " I send rogues and " + roguesLeft + " rogues go left");
-				for(int i = 0; i < amountOfRogues; i++) { 
-					if(i < roguesLeft) {
-						leftWave.Add(rogues[i]);
-						rogues[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(rogues[i]);
-						rogues[i].waypointPoolToUse = 1;
-					}
-				}
-			} else if (orderMonks == tmpIndex) {
-//				Debug.Log("With index " + tmpIndex + " I send monks and " + monksLeft + " monks go left");
-				for(int i = 0; i < amountOfMonks; i++) { 
-					if(i < monksLeft) {
-						leftWave.Add(monks[i]);
-						monks[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(monks[i]);
-						monks[i].waypointPoolToUse = 1;
-					}
+			if(tmpIndex == orderWarrior) {
+				goingLeft = warriorsLeft;
+				amountOfEnemies = amountOfWarriors;
+				curEnemyList = warriors;
+			} else if (tmpIndex == orderMages) {
+				goingLeft = magesLeft;
+				amountOfEnemies = amountOfMages;
+				curEnemyList = mages;
+			} else if (tmpIndex == orderRogues) {
+				goingLeft = roguesLeft;
+				amountOfEnemies = amountOfRogues;
+				curEnemyList = rogues;
+			} else if (tmpIndex == orderMonks) {
+				goingLeft = monksLeft;
+				amountOfEnemies = amountOfMonks;
+				curEnemyList = monks;
+			}
+
+			for(int i = 0; i < amountOfEnemies; i++) { 
+				if(i < goingLeft) {
+					leftWave.Add(curEnemyList[i]);
+					curEnemyList[i].waypointPoolToUse = 0;
+				} else {
+					rightWave.Add(curEnemyList[i]);
+					curEnemyList[i].waypointPoolToUse = 1;
 				}
 			}
 

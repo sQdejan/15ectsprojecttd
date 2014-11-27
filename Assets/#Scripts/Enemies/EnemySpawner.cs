@@ -57,7 +57,7 @@ public class EnemySpawner : MonoBehaviour {
 
 		for(int i = 0; i < enemies.Count; i++) {
 			yield return new WaitForSeconds(spawnTimeBetweenEnemies);
-			enemies[i].Spawn();
+			enemies[i].Spawn(false);
 		}
 
 		curWave++;

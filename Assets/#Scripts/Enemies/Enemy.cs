@@ -11,6 +11,8 @@ public class Enemy : MonoBehaviour {
 	//Publics
 	public Transform waypointsPoolRight;
 	public Transform waypointsPoolLeft;
+	public Transform waypointsPoolRightEA;
+	public Transform waypointsPoolLeftEA;
 	public float moveSpeed = 0.7f; 
 	public float health = 0;
 	public float healthIncreaser = 10;
@@ -35,6 +37,8 @@ public class Enemy : MonoBehaviour {
 
 	private List<Transform> waypointsRight = new List<Transform>();
 	private List<Transform> waypointsLeft = new List<Transform>();
+	private List<Transform> waypointsRightEA = new List<Transform>();
+	private List<Transform> waypointsLeftEA = new List<Transform>();
 	private List<Transform> waypointsCurrent;
 	private int curWaypointIndex = 0;
 	private Vector3 direction;
@@ -46,6 +50,7 @@ public class Enemy : MonoBehaviour {
 	private float curStartHealth;
 	private float curBounty = 1;
 	private float bountyIncreaser = 1;
+	private bool amIEA = false;
 
 #endregion
 
@@ -64,13 +69,11 @@ public class Enemy : MonoBehaviour {
 	{
 		curStartHealth = health;
 
-		foreach(Transform t in waypointsPoolRight) {
-			waypointsRight.Add(t);
-		}
+		foreach(Transform t in waypointsPoolRight) { waypointsRight.Add(t); }
+		foreach(Transform t in waypointsPoolLeft) { waypointsLeft.Add(t); }
 
-		foreach(Transform t in waypointsPoolLeft) {
-			waypointsLeft.Add(t);
-		}
+		foreach(Transform t in waypointsPoolRightEA) { waypointsRightEA.Add(t); }
+		foreach(Transform t in waypointsPoolLeftEA) { waypointsLeftEA.Add(t); }
 
 		thisTransform = transform;
 		startPosition = transform.position;
@@ -99,9 +102,11 @@ public class Enemy : MonoBehaviour {
 
 			if(++curWaypointIndex >= waypointsCurrent.Count) {
 				Terminate();
-				if(--InteractionHandler.lifesRemaining <= 0) {
-					InteractionHandler.gameOver = true;
-					InteractionHandler.dGameOver(); //Calling delegate methods for end game
+				if(!amIEA) {
+					if(--InteractionHandler.lifesRemaining <= 0) {
+						InteractionHandler.gameOver = true;
+						InteractionHandler.dGameOver(); //Calling delegate methods for end game
+					}
 				}
 				return;
 			}
@@ -127,15 +132,22 @@ public class Enemy : MonoBehaviour {
 
 #region Miscellaneous
 
-	public void Spawn()
+	public void Spawn(bool amIEA)
 	{
+		this.amIEA = amIEA;
+
 		//0 for left, 1 for right
+		//2 for leftEA, 3 for rightEA
 		if(waypointPoolToUse == 0) {
 			waypointsCurrent = waypointsLeft;
-		} else {
+		} else if (waypointPoolToUse == 1){
 			waypointsCurrent = waypointsRight;
+		} else if (waypointPoolToUse == 2){
+			waypointsCurrent = waypointsLeftEA;
+		} else if(waypointPoolToUse == 3){
+			waypointsCurrent = waypointsRightEA;
 		}
-		
+
 		gameObject.SetActive(true);
 		thisTransform.position = waypointsCurrent[curWaypointIndex++].position;
 		WalkDirection();
@@ -144,7 +156,14 @@ public class Enemy : MonoBehaviour {
 	//When enemy is dead or reached goal reset the stats
 	void Terminate()
 	{
-		WaveHandler.enemiesDone++; //For updating when the last enemy has died == wave over
+		//For updating when the last enemy has died == wave over
+		if(!amIEA) {
+			WaveHandler.enemiesDone++; 
+		} else {
+			health = curStartHealth;
+			EAWaveHandler.totalTravelTime += travelTime;
+			EAWaveHandler.enemiesDone++;
+		}
 
 		travelTime = 0;
 		curWaypointIndex = 0;
@@ -259,10 +278,15 @@ public class Enemy : MonoBehaviour {
 		damage *= 1f - ((armor * 0.06f) / (1f + armor * 0.06f));
 		health -= damage;
 
-
+		if(amIEA)
+			EAWaveHandler.totalDamageTaken += damage;
+		else
+			WaveHandler.totalDamage += damage;
 
 		if(health <= 0) {
-			Bounty();
+			if(!amIEA) {
+				Bounty();
+			}
 			Terminate();
 		}
 	}
@@ -290,10 +314,11 @@ public class Enemy : MonoBehaviour {
 			dotDamage *= 1f - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f));
 			health -= dotDamage;
 			if(health <= 0) {
-				Bounty();
+				if(amIEA) {
+					Bounty();
+				}
 				Terminate();
 			}
-//			yield return new WaitForSeconds(1f);
 
 			float time = 0;
 
@@ -307,7 +332,6 @@ public class Enemy : MonoBehaviour {
 	IEnumerator SlowRoutine(float slow)
 	{
 		moveSpeed *= slow * (1 - slowResistance);
-//		yield return new WaitForSeconds(5f);
 		float time = 0;
 		
 		while(time < 5) {

@@ -8,7 +8,6 @@ public abstract class Projectile : MonoBehaviour {
 #region Variables
 
 	//Publics
-	public float travelSpeed = 0.5f;
 	public AttackType attackType;
 
 	[HideInInspector]
@@ -24,7 +23,8 @@ public abstract class Projectile : MonoBehaviour {
 	protected float slow;
 	protected Transform thisTransform;
 	protected float lastDistance = float.MaxValue;
-	
+	protected float travelSpeed = 0.5f;
+
 #endregion
 
 #region Accessors
@@ -44,6 +44,8 @@ public abstract class Projectile : MonoBehaviour {
 	{
 		originalPosition = transform.position;
 		thisTransform = transform;
+
+		gameObject.SetActive(false);
 	}
 
 	void FixedUpdate()
@@ -72,15 +74,16 @@ public abstract class Projectile : MonoBehaviour {
 		thisTransform.position += direction * travelSpeed * Time.fixedDeltaTime;
 	}
 
-	public virtual void Activate(Vector3 position, Transform target, float damage, float dotDamage, float slow)
+	public virtual void Activate(Vector3 position, Transform target, float damage, float dotDamage, float slow, float travelSpeed)
 	{
-		gameObject.SetActive(true);
 		thisTransform.position = position;
 		this.target = target;
 		available = false;
 		this.damage = damage;
 		this.dotDamage = dotDamage;
 		this.slow = slow;
+		this.travelSpeed = travelSpeed;
+		gameObject.SetActive(true);
 	}
 
 	public void Reset()

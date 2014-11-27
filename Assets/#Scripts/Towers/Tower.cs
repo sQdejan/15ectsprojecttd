@@ -11,6 +11,7 @@ public class Tower : MonoBehaviour {
 
 	//Publics
 	public float fireRateCoolDown = 0.5f;
+	public float projectileTravelSpeed;
 	public GameObject projectilePool;
 	public float radius = 2.5f;
     public float damage = 0;
@@ -116,7 +117,7 @@ public class Tower : MonoBehaviour {
 	{
 		for(int i = 0; i < projectiles.Count; i++) {
 			if(projectiles[i].available) {
-				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage, dotDamage, slow);
+				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage, dotDamage, slow, projectileTravelSpeed);
 				break;
 			}
 		}

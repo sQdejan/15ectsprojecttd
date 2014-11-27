@@ -11,7 +11,11 @@ public class EAWaveHandler : MonoBehaviour {
 	public GameObject magePool;
 	public GameObject roguePool;
 	public GameObject monkPool;
-	public GameObject towerPool;
+	public GameObject arrowTowerPool;
+	public GameObject poisonTowerPool;
+	public GameObject bombTowerPool;
+	public GameObject frostTowerPool;
+	public float spawnTimeBetweenEnemies = 0.5f;
 	public int waveSize = 30;
 	public int generations = 1;
 
@@ -22,22 +26,26 @@ public class EAWaveHandler : MonoBehaviour {
 	//Privates
 	private static EAWaveHandler instance;
 
-	private List<EAEnemy> warriors = new List<EAEnemy>();
-	private List<EAEnemy> mages = new List<EAEnemy>();
-	private List<EAEnemy> rogues = new List<EAEnemy>();
-	private List<EAEnemy> monks = new List<EAEnemy>();
-	private List<EAEnemy> leftWave;
-	private List<EAEnemy> rightWave;
+	private List<Enemy> warriors = new List<Enemy>();
+	private List<Enemy> mages = new List<Enemy>();
+	private List<Enemy> rogues = new List<Enemy>();
+	private List<Enemy> monks = new List<Enemy>();
+	private List<Enemy> leftWave;
+	private List<Enemy> rightWave;
 
-	private List<EATower> towers = new List<EATower>();
+	private List<Tower> arrowTowers = new List<Tower>();
+	private List<Tower> poisonTowers = new List<Tower>();
+	private List<Tower> bombTowers = new List<Tower>();
+	private List<Tower> frostTowers = new List<Tower>();
+
+	private List<Tower> activeTowers = new List<Tower>();
 
 	private float time; //FOR MEASUREMENTS
 	private float waveMaxHealth;
 	private int curGeneration = 1;
 	private int curWave = 0;
-	private int towersActivated = 0;
 
-	const int SIZE_OF_POPULATION = 5;
+	const int SIZE_OF_POPULATION = 10;
 	private EAWaveGenome[] population = new EAWaveGenome[SIZE_OF_POPULATION]; 
 
 #endregion
@@ -66,35 +74,38 @@ public class EAWaveHandler : MonoBehaviour {
 		//Set the first wave to one of members from the population
 		WaveHandler.genome = population[0];
 
-		foreach(Transform t in warriorPool.transform) { warriors.Add(t.GetComponent<EAEnemy>()); }
-		foreach(Transform t in magePool.transform) { mages.Add(t.GetComponent<EAEnemy>()); }
-		foreach(Transform t in roguePool.transform) { rogues.Add(t.GetComponent<EAEnemy>()); }
-		foreach(Transform t in monkPool.transform) { monks.Add(t.GetComponent<EAEnemy>()); }
+		//Enemies
+		foreach(Transform t in warriorPool.transform) { warriors.Add(t.GetComponent<Enemy>()); }
+		foreach(Transform t in magePool.transform) { mages.Add(t.GetComponent<Enemy>()); }
+		foreach(Transform t in roguePool.transform) { rogues.Add(t.GetComponent<Enemy>()); }
+		foreach(Transform t in monkPool.transform) { monks.Add(t.GetComponent<Enemy>()); }
 
-		foreach(Transform t in towerPool.transform) { towers.Add(t.GetComponent<EATower>()); }
+		//Towers
+		foreach(Transform t in arrowTowerPool.transform) { arrowTowers.Add(t.GetComponent<Tower>()); }
+		foreach(Transform t in poisonTowerPool.transform) { poisonTowers.Add(t.GetComponent<Tower>()); }
+		foreach(Transform t in bombTowerPool.transform) { bombTowers.Add(t.GetComponent<Tower>()); }
+		foreach(Transform t in frostTowerPool.transform) { frostTowers.Add(t.GetComponent<Tower>()); }
 
 		gameObject.SetActive(false);
 	}
-	
-	// Update is called once per frame
+
 	void FixedUpdate () {
 		//Create the wave flow
 
 		if(enemiesDone >= waveSize) {
 
 			enemiesDone = 0;
-			population[curWave].fitnessDamage = totalDamageTaken / waveMaxHealth * 100;
+			population[curWave].fitnessDamage = totalDamageTaken;
 			population[curWave].fitnessTravel = totalTravelTime;
-
 			totalDamageTaken = 0;
 			totalTravelTime = 0;
 
+			//Remember this should end after amount of generations hihihihi ^^
 			if(++curWave < SIZE_OF_POPULATION) {
 				StartCoroutine(SpawnWaves());
 			} else {
 				Debug.Log(Time.realtimeSinceStartup - time);
-				PrintFitness();
-
+//				PrintFitness();
 				curWave = 0;
 
 				if(++curGeneration > generations) {
@@ -111,43 +122,62 @@ public class EAWaveHandler : MonoBehaviour {
 
 	public void StartEAProcess()
 	{
+		SetupTowers();
+		Time.timeScale = 100;
 		time = Time.realtimeSinceStartup;
 		gameObject.SetActive(true);
-		SetupTowers();
-
-		foreach(EAEnemy e in warriors) { e.LevelUp(); }
-		foreach(EAEnemy e in mages) { e.LevelUp(); }
-		foreach(EAEnemy e in rogues) { e.LevelUp(); }
-		foreach(EAEnemy e in monks) { e.LevelUp(); }
-
 		StartCoroutine(SpawnWaves());
 	}
 
 	void SetupTowers()
 	{
-		foreach(Tower t in InteractionHandler.currentTowers) {
-			towers[towersActivated].transform.position = new Vector3(t.transform.position.x - 20, t.transform.position.y - 20, t.transform.position.z);
-			towers[towersActivated].radius = t.radius;
-			towers[towersActivated].damage = t.damage;
-			towers[towersActivated].dotDamage = t.dotDamage;
-			towers[towersActivated].slow = t.slow;
-			towers[towersActivated].aimFrontEnemy = t.aimFrontEnemy;
 
-			towers[towersActivated].Initialize(t.towerType);
+		for(int i = 0; i < 4; i++) {
+			int tmpIndex = 0;
+			List<Tower> curList;
+			List<Tower> curClassList;
 
-			towers[towersActivated].gameObject.SetActive(true);
+			if(i == 0) {
+				curList = InteractionHandler.currentArrowTowers;
+				curClassList = arrowTowers;
+			} else if (i == 1) {
+				curList = InteractionHandler.currentPoisonTowers;
+				curClassList = poisonTowers;
+			} else if (i == 2) {
+				curList = InteractionHandler.currentBombTowers;
+				curClassList = bombTowers;
+			} else {
+				curList = InteractionHandler.currentFrostTowers;
+				curClassList = frostTowers;
+			}
 
-			towersActivated++;
+			//Arrow Towers
+			foreach(Tower t in curList) {
+				curClassList[tmpIndex].transform.position = new Vector3(t.transform.position.x - 20, t.transform.position.y - 20, t.transform.position.z);
+				curClassList[tmpIndex].damage = t.damage;
+				curClassList[tmpIndex].dotDamage = t.dotDamage;
+				curClassList[tmpIndex].slow = t.slow;
+				curClassList[tmpIndex].available = false;
+
+				activeTowers.Add(curClassList[tmpIndex]);
+
+				curClassList[tmpIndex].gameObject.SetActive(true);
+				
+				tmpIndex++;
+			}
+			tmpIndex = 0;
 		}
 	}
 
+
 	void ShutDownTowers()
 	{
-		for(int i = 0; i < towersActivated; i++) {
-			towers[i].gameObject.SetActive(false);
+		foreach(Tower t in activeTowers) {
+			t.available = true;
+			t.gameObject.SetActive(false);
 		}
 
-		towersActivated = 0;
+		activeTowers.Clear();
 	}
 
 	IEnumerator SpawnWaves()
@@ -165,16 +195,21 @@ public class EAWaveHandler : MonoBehaviour {
 			shouldContinue = false;
 			
 			if(lIndex < leftLength) {
-				leftWave[lIndex++].Spawn();
+				leftWave[lIndex++].Spawn(true);
 				shouldContinue = true;
 			}
 			
 			if(rIndex < rightLength) {
-				rightWave[rIndex++].Spawn();
+				rightWave[rIndex++].Spawn(true);
 				shouldContinue = true;
 			}
 			
-			yield return null;
+			float time = 0;
+			
+			while(time < spawnTimeBetweenEnemies) {
+				time += Time.fixedDeltaTime;
+				yield return new WaitForFixedUpdate();
+			}
 		}
 	}
 
@@ -187,13 +222,15 @@ public class EAWaveHandler : MonoBehaviour {
 	
 	void ProduceNextGeneration()
 	{
-		
+		for(int i = 0; i < SIZE_OF_POPULATION; i++) {
+			population[i].Mutate();
+		}
 	}
 
 	void ReadChromosome()
 	{
-		rightWave = new List<EAEnemy>();
-		leftWave = new List<EAEnemy>();
+		rightWave = new List<Enemy>();
+		leftWave = new List<Enemy>();
 		
 		int orderWarrior = population[curWave].Chromosome[0];
 		int orderMages = population[curWave].Chromosome[1];
@@ -218,50 +255,35 @@ public class EAWaveHandler : MonoBehaviour {
 		int tmpIndex = 1;
 		
 		while(tmpIndex <= 4) {
+			int goingLeft = 0;
+			int amountOfEnemies = 0;
+			List<Enemy> curEnemyList = new List<Enemy>();
 			
-			if(orderWarrior == tmpIndex) {
-				//				Debug.Log("With index " + tmpIndex + " I send warriors and " + warriorsLeft + " warriors go left");
-				for(int i = 0; i < amountOfWarriors; i++) { 
-					if(i < warriorsLeft) {
-						leftWave.Add(warriors[i]);
-						warriors[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(warriors[i]);
-						warriors[i].waypointPoolToUse = 1;
-					}
-				}
-			} else if (orderMages == tmpIndex) {
-				//				Debug.Log("With index " + tmpIndex + " I send mages and " + magesLeft + " mages go left");
-				for(int i = 0; i < amountOfMages; i++) { 
-					if(i < magesLeft) {
-						leftWave.Add(mages[i]);
-						mages[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(mages[i]);
-						mages[i].waypointPoolToUse = 1;
-					}
-				}
-			} else if (orderRogues == tmpIndex) {
-				//				Debug.Log("With index " + tmpIndex + " I send rogues and " + roguesLeft + " rogues go left");
-				for(int i = 0; i < amountOfRogues; i++) { 
-					if(i < roguesLeft) {
-						leftWave.Add(rogues[i]);
-						rogues[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(rogues[i]);
-						rogues[i].waypointPoolToUse = 1;
-					}
-				}
-			} else if (orderMonks == tmpIndex) {
-				//				Debug.Log("With index " + tmpIndex + " I send monks and " + monksLeft + " monks go left");
-				for(int i = 0; i < amountOfMonks; i++) { 
-					if(i < monksLeft) {
-						leftWave.Add(monks[i]);
-						monks[i].waypointPoolToUse = 0;
-					} else {
-						rightWave.Add(monks[i]);
-						monks[i].waypointPoolToUse = 1;
-					}
+			if(tmpIndex == orderWarrior) {
+				goingLeft = warriorsLeft;
+				amountOfEnemies = amountOfWarriors;
+				curEnemyList = warriors;
+			} else if (tmpIndex == orderMages) {
+				goingLeft = magesLeft;
+				amountOfEnemies = amountOfMages;
+				curEnemyList = mages;
+			} else if (tmpIndex == orderRogues) {
+				goingLeft = roguesLeft;
+				amountOfEnemies = amountOfRogues;
+				curEnemyList = rogues;
+			} else if (tmpIndex == orderMonks) {
+				goingLeft = monksLeft;
+				amountOfEnemies = amountOfMonks;
+				curEnemyList = monks;
+			}
+			
+			for(int i = 0; i < amountOfEnemies; i++) { 
+				if(i < goingLeft) {
+					leftWave.Add(curEnemyList[i]);
+					curEnemyList[i].waypointPoolToUse = 2;
+				} else {
+					rightWave.Add(curEnemyList[i]);
+					curEnemyList[i].waypointPoolToUse = 3;
 				}
 			}
 			
@@ -271,11 +293,11 @@ public class EAWaveHandler : MonoBehaviour {
 		waveMaxHealth = 0;
 
 		//Calculate max health
-		foreach(EAEnemy e in leftWave) {
+		foreach(Enemy e in leftWave) {
 			waveMaxHealth += e.health;
 		}
 
-		foreach(EAEnemy e in rightWave) {
+		foreach(Enemy e in rightWave) {
 			waveMaxHealth += e.health;
 		}
 

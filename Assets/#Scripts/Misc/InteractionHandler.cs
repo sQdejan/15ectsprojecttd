@@ -20,7 +20,11 @@ public class InteractionHandler : MonoBehaviour {
 	public static float curGold = 100;
 	public static int lifesRemaining = 50;
 	public static bool gameOver = false;
-	public static List<Tower> currentTowers = new List<Tower>();
+	public static List<Tower> currentArrowTowers = new List<Tower>();
+	public static List<Tower> currentPoisonTowers = new List<Tower>();
+	public static List<Tower> currentBombTowers = new List<Tower>();
+	public static List<Tower> currentFrostTowers = new List<Tower>();
+
 
 	public delegate void GameOver();
 	public static GameOver dGameOver; //Used for functions that needs to be called if game is over.
@@ -68,7 +72,7 @@ public class InteractionHandler : MonoBehaviour {
 		frostTowerCost = frostTowers[0].cost;
 	}
 
-	void FixedUpdate () 
+	void Update () 
 	{
 		if(isBuilding) {
 			TowerBuildingInteraction();
@@ -145,7 +149,20 @@ public class InteractionHandler : MonoBehaviour {
 		curGold -= tmpTower.cost;
 		tmpTower.cost *= 4f;
 
-		currentTowers.Add(tmpTower);
+		switch(tmpTower.towerType) {
+		case TowerType.Arrow:
+			currentArrowTowers.Add(tmpTower);
+			break;
+		case TowerType.Poison:
+			currentPoisonTowers.Add(tmpTower);
+			break;
+		case TowerType.Bomb:
+			currentBombTowers.Add(tmpTower);
+			break;
+		case TowerType.Frost:
+			currentFrostTowers.Add(tmpTower);
+			break;
+		}
 
 		RangeIndicator.selected = false;
 		lastTileHit.SetActive(false);
@@ -244,7 +261,20 @@ public class InteractionHandler : MonoBehaviour {
 			if(GUI.Button(new Rect(up.x - width / 2, Screen.height - up.y + (offSetY - height), width, height), "Sell Tower")) {
 				Tower tmpTower = curSelectedTower.GetComponent<Tower>();
 
-				currentTowers.Remove(tmpTower);
+				switch(tmpTower.towerType) {
+				case TowerType.Arrow:
+					currentArrowTowers.Remove(tmpTower);
+					break;
+				case TowerType.Poison:
+					currentPoisonTowers.Remove(tmpTower);
+					break;
+				case TowerType.Bomb:
+					currentBombTowers.Remove(tmpTower);
+					break;
+				case TowerType.Frost:
+					currentFrostTowers.Remove(tmpTower);
+					break;
+				}
 
 				curGold += (float)tmpTower.curNetWorth * 0.75f;
 				tmpTower.ResetTower();
