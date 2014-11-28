@@ -6,10 +6,7 @@ public enum AttackType {NormalAttack, PiercingAttack, SiegeAttack, MagicAttack};
 public abstract class Projectile : MonoBehaviour {
 
 #region Variables
-
-	//Publics
-	public AttackType attackType;
-
+	
 	[HideInInspector]
 	public bool available = true;
 
@@ -18,6 +15,7 @@ public abstract class Projectile : MonoBehaviour {
 	private Transform target;
 
 	//Protected
+	protected AttackType attackType;
 	protected float damage = 1f;
 	protected float dotDamage;
 	protected float slow;
@@ -74,15 +72,16 @@ public abstract class Projectile : MonoBehaviour {
 		thisTransform.position += direction * travelSpeed * Time.fixedDeltaTime;
 	}
 
-	public virtual void Activate(Vector3 position, Transform target, float damage, float dotDamage, float slow, float travelSpeed)
+	public virtual void Activate(Vector3 position, Transform target, float damage, float dotDamage, float slow, float travelSpeed, AttackType attackType)
 	{
 		thisTransform.position = position;
 		this.target = target;
-		available = false;
+		this.attackType = attackType;
 		this.damage = damage;
 		this.dotDamage = dotDamage;
 		this.slow = slow;
 		this.travelSpeed = travelSpeed;
+		available = false;
 		gameObject.SetActive(true);
 	}
 

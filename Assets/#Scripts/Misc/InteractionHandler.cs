@@ -281,6 +281,9 @@ public class InteractionHandler : MonoBehaviour {
 				curSelectedTower = null;
 				towerSelected = false;
 			}
+
+			//Show stats for the current tower
+
 		}
 	}
 

@@ -20,6 +20,8 @@ public class Tower : MonoBehaviour {
 	public float slow;
 	public bool aimFrontEnemy = false;
 	public TowerType towerType;
+	public AttackType attackType;
+	public string aboutTower = "";
 
 	[HideInInspector]
 	public bool available = true; //If the tower is free to be build
@@ -29,12 +31,14 @@ public class Tower : MonoBehaviour {
 	public float curNetWorth = 0;
 	[HideInInspector]
 	public GameObject tileReplaced; //The tile that the tower replaced. Needs to be activated if tower is sold.
+	[HideInInspector]
+	public bool canShoot = true;
+
 
 	//Privates
 	private Transform thisTransform;
 	private Vector3 startPosition;
 	private List<Projectile> projectiles = new List<Projectile>();
-	private bool canShoot = true;
 
 	private float startCost;
 	private float startDamage;
@@ -117,7 +121,7 @@ public class Tower : MonoBehaviour {
 	{
 		for(int i = 0; i < projectiles.Count; i++) {
 			if(projectiles[i].available) {
-				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage, dotDamage, slow, projectileTravelSpeed);
+				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage, dotDamage, slow, projectileTravelSpeed, attackType);
 				break;
 			}
 		}

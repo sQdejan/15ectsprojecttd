@@ -9,10 +9,10 @@ public class ProjectileBomb : Projectile {
 	private Vector3 targetPos;
 	private LayerMask targetLayer;
 
-	public override void Activate (Vector3 position, Transform target, float damage, float dotDamage, float slow, float travelSpeed)
+	public override void Activate (Vector3 position, Transform target, float damage, float dotDamage, float slow, float travelSpeed, AttackType attackType)
 	{
 		targetLayer = 1 << LayerMask.NameToLayer("Enemy");
-		base.Activate (position, target, damage, dotDamage, slow, travelSpeed);
+		base.Activate (position, target, damage, dotDamage, slow, travelSpeed, attackType);
 		targetPos = target.position;
 	}
 

@@ -9,6 +9,9 @@ public class EAWaveGenome {
 
 	public float fitnessDamage;
 	public float fitnessTravel;
+	public float fitnessEnemiesDied;
+	public float totalFitness;
+	public bool haveIbeenTested = false;
 
 	private static System.Random rndGenerator = new System.Random();
 	private static int waveSize;

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class EAWaveHandler : MonoBehaviour {
 
@@ -22,6 +23,8 @@ public class EAWaveHandler : MonoBehaviour {
 	public static int enemiesDone = 0;
 	public static float totalDamageTaken = 0; //Probably for fitness
 	public static float totalTravelTime = 0; //Probably for fitness
+
+	public static int enemiesDied = 0;
 
 	//Privates
 	private static EAWaveHandler instance;
@@ -45,6 +48,7 @@ public class EAWaveHandler : MonoBehaviour {
 	private int curGeneration = 1;
 	private int curWave = 0;
 
+	const int MAX_TRAVEL_TIME = 22000; 
 	const int SIZE_OF_POPULATION = 10;
 	private EAWaveGenome[] population = new EAWaveGenome[SIZE_OF_POPULATION]; 
 
@@ -95,26 +99,39 @@ public class EAWaveHandler : MonoBehaviour {
 		if(enemiesDone >= waveSize) {
 
 			enemiesDone = 0;
-			population[curWave].fitnessDamage = totalDamageTaken;
-			population[curWave].fitnessTravel = totalTravelTime;
+			population[curWave].fitnessDamage = totalDamageTaken / waveMaxHealth; //Low == good
+			population[curWave].fitnessTravel = totalTravelTime / MAX_TRAVEL_TIME; //High == good
+			population[curWave].fitnessEnemiesDied = (float)enemiesDied / waveSize; //Low == good
+			population[curWave].totalFitness = 2 - population[curWave].fitnessDamage - population[curWave].fitnessEnemiesDied + population[curWave].fitnessTravel; 
+			population[curWave].haveIbeenTested = true;
+			enemiesDied = 0;
 			totalDamageTaken = 0;
 			totalTravelTime = 0;
 
-			//Remember this should end after amount of generations hihihihi ^^
-			if(++curWave < SIZE_OF_POPULATION) {
+			if(curWave < SIZE_OF_POPULATION - 1) {
 				StartCoroutine(SpawnWaves());
 			} else {
-				Debug.Log(Time.realtimeSinceStartup - time);
-//				PrintFitness();
 				curWave = 0;
+				EvaluateGeneration();
 
 				if(++curGeneration > generations) {
+					Debug.Log(Time.realtimeSinceStartup - time);
+					Time.timeScale = 1;
 					curGeneration = 1;
 					ShutDownTowers();
+					WaveHandler.genome = population[0];
+					WaveHandler.Instance.StartWaveHandler();
+
+					//Reset population for next round
+					for(int i = 0; i < SIZE_OF_POPULATION; i++) {
+						population[i].haveIbeenTested = false;
+					}
+
 					gameObject.SetActive(false);
 					return;
 				}
 
+				ProduceNextGeneration();
 				StartCoroutine(SpawnWaves());
 			}
 		}
@@ -173,8 +190,9 @@ public class EAWaveHandler : MonoBehaviour {
 	void ShutDownTowers()
 	{
 		foreach(Tower t in activeTowers) {
-			t.available = true;
 			t.gameObject.SetActive(false);
+			t.available = true;
+			t.canShoot = true;
 		}
 
 		activeTowers.Clear();
@@ -182,6 +200,14 @@ public class EAWaveHandler : MonoBehaviour {
 
 	IEnumerator SpawnWaves()
 	{
+		//Finding the first chromosome who has not been tested
+		for(int i = curWave; i < SIZE_OF_POPULATION; i++) {
+			if(!population[i].haveIbeenTested) {
+				curWave = i;
+				break;
+			}
+		}
+
 		ReadChromosome();
 
 		bool shouldContinue = true;
@@ -217,14 +243,40 @@ public class EAWaveHandler : MonoBehaviour {
 
 	void EvaluateGeneration()
 	{
-		
+//		Debug.Log("Cur generation = " + curGeneration);
+//
+//		string unsorted = "";
+//
+//		for(int i = 0; i < population.Length; i++) {
+//			unsorted += population[i].fitnessTravel + ", ";
+//		}
+//
+//		Debug.Log(unsorted);
+
+		Array.Sort(population, delegate (EAWaveGenome g1, EAWaveGenome g2){
+			return g2.totalFitness.CompareTo(g1.totalFitness);
+		});
+
+//		string sorted = "";
+//
+//		for(int i = 0; i < population.Length; i++) {
+//			sorted += population[i].fitnessTravel + ", ";
+//		}
+//
+//		Debug.Log(sorted);
+
+		Debug.Log("Generation " + curGeneration + " travel fitness = " + population[0].fitnessTravel + " enemies that died = " + 
+		          population[0].fitnessEnemiesDied + " - % damage = " + population[0].fitnessDamage + " total fitness = " + population[0].totalFitness);
 	}
 	
 	void ProduceNextGeneration()
 	{
-		for(int i = 0; i < SIZE_OF_POPULATION; i++) {
-			population[i].Mutate();
+		for(int i = 0; i < SIZE_OF_POPULATION / 2 - 2; i++) {
+			population[SIZE_OF_POPULATION / 2 - 1 + i] = population[i].Mutate();
 		}
+
+		population[SIZE_OF_POPULATION - 2] = new EAWaveGenome(waveSize);
+		population[SIZE_OF_POPULATION - 1] = new EAWaveGenome(waveSize);
 	}
 
 	void ReadChromosome()

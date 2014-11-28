@@ -11,6 +11,7 @@ public class WaveHandler : MonoBehaviour {
 	public GameObject magePool;
 	public GameObject roguePool;
 	public GameObject monkPool;
+	public GameObject healthBarPool;
 	public int waveSize = 30;
 	public int waves;
 	public float timeBetweenWaves = 15f;
@@ -18,27 +19,47 @@ public class WaveHandler : MonoBehaviour {
 	
 	public static int enemiesDone = 0; 
 	public static EAWaveGenome genome;
-	public static float totalDamage = 0;
 
 	//Privates
+	private static WaveHandler instance;
+
 	private List<Enemy> warriors = new List<Enemy>();
 	private List<Enemy> mages = new List<Enemy>();
 	private List<Enemy> rogues = new List<Enemy>();
 	private List<Enemy> monks = new List<Enemy>();
 	private List<Enemy> leftWave;
 	private List<Enemy> rightWave;
+
+	private List<HealthBar> healthBars = new List<HealthBar>();
+
 	private int curWave = 0;
 
 #endregion
+
+	private WaveHandler() {}
 	
+	public static WaveHandler Instance
+	{
+		get {
+			if(instance == null) {
+				instance = GameObject.FindObjectOfType<WaveHandler>();
+			}
+			return instance;
+		}
+	}
+
 	void Start()
 	{
+		instance = this;
+
 		InteractionHandler.dGameOver += StopGame; //Adding StopGame() to GameOver delegate
 
 		foreach(Transform t in warriorPool.transform) { warriors.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in magePool.transform) { mages.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in roguePool.transform) { rogues.Add(t.GetComponent<Enemy>()); }
 		foreach(Transform t in monkPool.transform) { monks.Add(t.GetComponent<Enemy>()); }
+
+		foreach(Transform t in healthBarPool.transform) { healthBars.Add(t.GetComponent<HealthBar>()); }
 
 		StartCoroutine("FirstWave");
 	}
@@ -50,25 +71,32 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		if(enemiesDone >= waveSize) {
+
 			enemiesDone = 0;
 			Debug.Log("Wave " + (curWave) + " is over");
 			if(++curWave <= waves) {
-				StartCoroutine("WaveWaiting");
-				Debug.Log("Damage Taken Normal " + totalDamage);
+				foreach(Enemy e in warriors) { e.LevelUp(); }
+				foreach(Enemy e in mages) { e.LevelUp(); }
+				foreach(Enemy e in rogues) { e.LevelUp(); }
+				foreach(Enemy e in monks) { e.LevelUp(); }
 
-//				foreach(Enemy e in warriors) { e.LevelUp(); }
-//				foreach(Enemy e in mages) { e.LevelUp(); }
-//				foreach(Enemy e in rogues) { e.LevelUp(); }
-//				foreach(Enemy e in monks) { e.LevelUp(); }
+				foreach(HealthBar h in healthBars) { h.Disable(); }
 
 				EAWaveHandler.Instance.StartEAProcess();
 			}
 		}
 	}
 
+	public void StartWaveHandler()
+	{
+		StartCoroutine(WaveWaiting());
+	}
+
 	void StopGame()
 	{
 		StopAllCoroutines();
+
+		foreach(HealthBar h in healthBars) { h.Disable(); }
 
 		//Maybe just let it run out
 		foreach(Enemy e in leftWave) {
@@ -89,6 +117,7 @@ public class WaveHandler : MonoBehaviour {
 		int rightLength = rightWave.Count;
 		int lIndex = 0;
 		int rIndex = 0;
+		int healthBarIndex = 0;
 
 		while(shouldContinue) {
 
@@ -96,11 +125,13 @@ public class WaveHandler : MonoBehaviour {
 
 			if(lIndex < leftLength) {
 				leftWave[lIndex++].Spawn(false);
+				healthBars[healthBarIndex++].SetTarget(leftWave[lIndex - 1]);
 				shouldContinue = true;
 			}
 
 			if(rIndex < rightLength) {
 				rightWave[rIndex++].Spawn(false);
+				healthBars[healthBarIndex++].SetTarget(rightWave[rIndex - 1]);
 				shouldContinue = true;
 			}
 
@@ -117,7 +148,7 @@ public class WaveHandler : MonoBehaviour {
 	{
 		float time = 0;
 		
-		while(time < (timeBetweenWaves + 50) * 100) {
+		while(time < timeBetweenWaves) {
 			time += Time.fixedDeltaTime;
 			yield return new WaitForFixedUpdate();
 		}
@@ -135,18 +166,6 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		StartCoroutine("SpawnWaves");
-	}
-
-#region EA-related
-
-	void EvaluateGeneration()
-	{
-		
-	}
-	
-	void ProduceNextGeneration()
-	{
-		
 	}
 	
 	void ReadChromosome()
@@ -211,8 +230,5 @@ public class WaveHandler : MonoBehaviour {
 
 			tmpIndex++;
 		}
-	}
-
-#endregion
-
+	}	
 }

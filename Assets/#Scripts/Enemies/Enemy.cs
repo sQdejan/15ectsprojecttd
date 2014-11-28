@@ -63,6 +63,13 @@ public class Enemy : MonoBehaviour {
 		}
 	}
 
+	public float CurStartHealth
+	{
+		get {
+			return curStartHealth;
+		}
+	}
+
 #endregion
 
 	void Awake()
@@ -220,19 +227,6 @@ public class Enemy : MonoBehaviour {
 #endregion
 
 #region Attack/Damage Related
-
-	//If this enemy is the target then I send the object over to the projectile 
-	//that handles the different kind of damage type and modifiers
-//	void OnTriggerEnter2D(Collider2D col) {
-//		
-//		Projectile projectile = col.GetComponent<Projectile>();
-//		
-//		if(projectile.Target == thisTransform){
-//			projectile.DamageType(this);
-//			projectile.Reset();
-//		}
-//	}
-
 	
 	public void TakeDamage(float damage, AttackType at)
 	{
@@ -278,15 +272,18 @@ public class Enemy : MonoBehaviour {
 		damage *= 1f - ((armor * 0.06f) / (1f + armor * 0.06f));
 		health -= damage;
 
-		if(amIEA)
+		if(amIEA){
 			EAWaveHandler.totalDamageTaken += damage;
-		else
-			WaveHandler.totalDamage += damage;
+		}
 
 		if(health <= 0) {
-			if(!amIEA) {
+			if(amIEA) {
+				EAWaveHandler.totalDamageTaken += health;
+				EAWaveHandler.enemiesDied++;
+			} else {
 				Bounty();
 			}
+
 			Terminate();
 		}
 	}
@@ -315,7 +312,10 @@ public class Enemy : MonoBehaviour {
 			health -= dotDamage;
 			if(health <= 0) {
 				if(amIEA) {
-					Bounty();
+					EAWaveHandler.totalDamageTaken += health;
+					EAWaveHandler.enemiesDied++;
+				} else {
+					Bounty ();
 				}
 				Terminate();
 			}
