@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -71,7 +71,6 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		if(enemiesDone >= waveSize) {
-
 			enemiesDone = 0;
 			Debug.Log("Wave " + (curWave) + " is over");
 			if(++curWave <= waves) {
@@ -100,11 +99,11 @@ public class WaveHandler : MonoBehaviour {
 
 		//Maybe just let it run out
 		foreach(Enemy e in leftWave) {
-			e.TakeDamage(float.MaxValue, AttackType.NormalAttack);
+			e.TakeDamage(float.MaxValue, AttackType.Normal);
 		}
 
 		foreach(Enemy e in rightWave) {
-			e.TakeDamage(float.MaxValue, AttackType.NormalAttack);
+			e.TakeDamage(float.MaxValue, AttackType.Normal);
 		}
 	}
 

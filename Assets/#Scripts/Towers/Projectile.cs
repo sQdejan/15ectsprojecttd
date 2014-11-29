@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum AttackType {NormalAttack, PiercingAttack, SiegeAttack, MagicAttack};
+public enum AttackType {Normal, Piercing, Siege, Magic};
 
 public abstract class Projectile : MonoBehaviour {
 

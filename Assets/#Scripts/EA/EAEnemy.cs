@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -163,33 +163,33 @@ public class EAEnemy : MonoBehaviour {
 		//Increase/Deacrease damage depending on armor type and attack type 
 		switch (armorType) {
 		case ArmorType.LightArmor:
-			if(at == AttackType.PiercingAttack) {
+			if(at == AttackType.Piercing) {
 				damage *= 1.75f;
-			} else if (at == AttackType.MagicAttack) {
+			} else if (at == AttackType.Magic) {
 				damage *= 1.25f;
-			} else if (at == AttackType.SiegeAttack) {
+			} else if (at == AttackType.Siege) {
 				damage *= 0.75f;
 			}
 			break;
 			
 		case ArmorType.MediumArmor:
-			if(at == AttackType.NormalAttack) {
+			if(at == AttackType.Normal) {
 				damage *= 1.5f;
-			} else if (at == AttackType.SiegeAttack) {
+			} else if (at == AttackType.Siege) {
 				damage *= 1.25f;
-			} else if (at == AttackType.PiercingAttack) {
+			} else if (at == AttackType.Piercing) {
 				damage *= 0.75f;
-			} else if (at == AttackType.MagicAttack) {
+			} else if (at == AttackType.Magic) {
 				damage *= 0.75f;
 			}
 			break;
 			
 		case ArmorType.HeavyArmor:
-			if(at == AttackType.MagicAttack) {
+			if(at == AttackType.Magic) {
 				damage *= 1.75f;
-			} else if (at == AttackType.NormalAttack) {
+			} else if (at == AttackType.Normal) {
 				damage *= 0.75f;
-			} else if (at == AttackType.PiercingAttack) {
+			} else if (at == AttackType.Piercing) {
 				damage *= 0.75f;
 			} 
 			break;

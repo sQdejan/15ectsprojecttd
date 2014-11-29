@@ -68,6 +68,8 @@ public class Tower : MonoBehaviour {
 
 	void FixedUpdate()
 	{
+		if(EAWaveHandler.amIRunning)
+			return;
 //		Debug.DrawLine(thisTransform.position, thisTransform.position + Vector3.up * radius);
 //		Debug.DrawLine(thisTransform.position, thisTransform.position - Vector3.up * radius);
 //		Debug.DrawLine(thisTransform.position, thisTransform.position + Vector3.right * radius);
@@ -119,6 +121,8 @@ public class Tower : MonoBehaviour {
 
 	void Shooting()
 	{
+//		curTarget.GetComponent<Enemy>().TakeDamage(damage, attackType);
+
 		for(int i = 0; i < projectiles.Count; i++) {
 			if(projectiles[i].available) {
 				projectiles[i].Activate(thisTransform.position, curTarget.transform, damage, dotDamage, slow, projectileTravelSpeed, attackType);

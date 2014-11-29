@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 
@@ -41,19 +41,19 @@ public class EATower : MonoBehaviour {
 		switch (tp) {
 		case TowerType.Arrow:
 			shootingMethod = ArrowShooting;
-			attackType = AttackType.PiercingAttack;
+			attackType = AttackType.Piercing;
 			break;
 		case TowerType.Bomb:
 			shootingMethod = BombShooting;
-			attackType = AttackType.SiegeAttack;
+			attackType = AttackType.Siege;
 			break;
 		case TowerType.Frost:
 			shootingMethod = SlowShooting;
-			attackType = AttackType.MagicAttack;
+			attackType = AttackType.Magic;
 			break;
 		case TowerType.Poison:
 			shootingMethod = PoisonShooting;
-			attackType = AttackType.NormalAttack;
+			attackType = AttackType.Normal;
 			break;
 		default:
 			break;

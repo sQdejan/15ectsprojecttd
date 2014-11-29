@@ -13,7 +13,7 @@ public class EAWaveGenome {
 	public float totalFitness;
 	public bool haveIbeenTested = false;
 
-	private static System.Random rndGenerator = new System.Random();
+	public static System.Random rndGenerator = new System.Random();
 	private static int waveSize;
 	private int[] chromosome = new int[12]; //1. Warrios order in wave, 5. Amount of Warriors, 9. % Split of Warriors
 											//2. Mages order in wave, 6. Amount of Mages, 10. % Split of Mages
@@ -28,6 +28,10 @@ public class EAWaveGenome {
 	{
 		get {
 			return chromosome;
+		}
+
+		set {
+			chromosome = value;
 		}
 	}
 
@@ -77,15 +81,14 @@ public class EAWaveGenome {
 
 #region Mutation
 
-	public EAWaveGenome Mutate()
+	public int[] Mutate()
 	{
 		int[] c = (int[])this.chromosome.Clone();
 
 		MutateSwapNumbers(c);
 		MutateAmountOfEnemies(c);
 		MutateLeftGoing(c);
-
-		return new EAWaveGenome(c);
+		return c;
 	}
 
 	void MutateSwapNumbers(int[] c)
@@ -118,7 +121,7 @@ public class EAWaveGenome {
 			whichToIncrease = 7;
 		}
 
-		int increaseWith = 3;
+		int increaseWith = 1;
 
 		if(c[whichToIncrease] > waveSize - increaseWith) {
 			increaseWith = waveSize - c[whichToIncrease];
@@ -167,11 +170,11 @@ public class EAWaveGenome {
 
 			//I leave 1 percent so there is a change that it will go the other way
 			if(c[whichToChange] < upOrDown) {
-				if(c[whichToChange] > 6) {
+				if(c[whichToChange] > 10) {
 					c[whichToChange] -= 5;
 				}
 			} else {
-				if(c[whichToChange] < 99) {
+				if(c[whichToChange] < 90) {
 					c[whichToChange] += 5;
 				}
 			}
