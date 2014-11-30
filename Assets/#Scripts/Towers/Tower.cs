@@ -23,6 +23,8 @@ public class Tower : MonoBehaviour {
 	public AttackType attackType;
 	public string aboutTower = "";
 
+	public Sprite[] lvlSprites;
+
 	[HideInInspector]
 	public bool available = true; //If the tower is free to be build
 	[HideInInspector]
@@ -157,6 +159,7 @@ public class Tower : MonoBehaviour {
 		damage = startDamage;
 		dotDamage = startDotDamage;
 		slow = startSlow;
+		GetComponent<SpriteRenderer>().sprite = lvlSprites[0];
 		level = 1;
 		curNetWorth = 0;
 		RangeIndicator.selected = false;

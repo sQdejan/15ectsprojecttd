@@ -22,14 +22,17 @@ public class InteractionHandler : MonoBehaviour {
 	public GameObject bombTower;
 	public GameObject frostTower;
 
+	public GUIStyle goldStyle;
+	public GUIStyle normalStyle;
+
 	public static float curGold = 100;
-	public static int lifesRemaining = 100000;
+	public static int lifesRemaining = 50;
 	public static bool gameOver = false;
 	public static List<Tower> currentArrowTowers = new List<Tower>();
 	public static List<Tower> currentPoisonTowers = new List<Tower>();
 	public static List<Tower> currentBombTowers = new List<Tower>();
 	public static List<Tower> currentFrostTowers = new List<Tower>();
-
+	
 
 	public delegate void GameOver();
 	public static GameOver dGameOver; //Used for functions that needs to be called if game is over.
@@ -193,6 +196,7 @@ public class InteractionHandler : MonoBehaviour {
 	{
 		Tower tmpTower = curSelectedTower.GetComponent<Tower>();
 
+		curSelectedTower.GetComponent<SpriteRenderer>().sprite = tmpTower.lvlSprites[tmpTower.level];
 		tmpTower.level++;
 		tmpTower.damage *= 4f;
 		tmpTower.dotDamage *= 4f;
@@ -224,9 +228,11 @@ public class InteractionHandler : MonoBehaviour {
 					RangeIndicator.SetTarget(hit.collider.transform, hit.collider.GetComponent<Tower>().radius);
 					curSelectedTower = hit.collider.gameObject;
 					RangeIndicator.selected = true;
+					curCreepSelected = null;
 					creepSelected = false;
 				} else {
 					towerSelected = false;
+					curSelectedTower = null;
 					RangeIndicator.selected = false;
 					curCreepSelected = hit.collider.gameObject;
 				}
@@ -249,43 +255,54 @@ public class InteractionHandler : MonoBehaviour {
 
 #region GUI related
 
-	Rect aRect = new Rect(810, 550, 145, 40);
-	Rect pRect = new Rect(810, 500, 145, 40);
-	Rect bRect = new Rect(810, 450, 145, 40);
-	Rect fRect = new Rect(810, 400, 145, 40);
+	Rect aRect = new Rect(810, 480, 145, 40);
+	Rect pRect = new Rect(810, 430, 145, 40);
+	Rect bRect = new Rect(810, 380, 145, 40);
+	Rect fRect = new Rect(810, 330, 145, 40);
 
 	void OnGUI()
 	{
+		GUI.skin.label.wordWrap = true;
+
 		if(aRect.Contains(Input.mousePosition)) {
 			curT = arrowT;
 			showTowerStats = true;
+			creepSelected = false;
 		} else if (pRect.Contains(Input.mousePosition)) {
 			curT = poisonT;
 			showTowerStats = true;
+			creepSelected = false;
 		} else if (bRect.Contains(Input.mousePosition)) {
 			curT = bombT;
 			showTowerStats = true;
+			creepSelected = false;
 		} else if (fRect.Contains(Input.mousePosition)) {
 			curT = frostT;
 			showTowerStats = true;
+			creepSelected = false;
 		} else {
 			showTowerStats = false;
 		}
 
-		//Tower building buttons
-		if(GUI.Button(new Rect(810, 10, 145, 40), "Arrow Tower")){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
-
-		if(GUI.Button(new Rect(810, 60, 145, 40), "Poison Tower")){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
-
-		if(GUI.Button(new Rect(810, 110, 145, 40), "Bomb Tower")){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
-
-		if(GUI.Button(new Rect(810, 160, 145, 40), "Frost Tower")){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
-
+		
 		//For economy
-		GUI.Label(new Rect(810, 240, 120, 20), "Current Gold: " + (int)curGold);
-
+		GUI.Label(new Rect(810, 10, 120, 20), "$$: " + (int)curGold, goldStyle);
+		
 		//For showing lives left
-		GUI.Label(new Rect(810, 270, 120, 25), "Lifes Remaining: " + lifesRemaining);
+		GUI.Label(new Rect(810, 30, 120, 25), "Lifes: " + lifesRemaining, goldStyle);
+
+		//For waves
+		GUI.Label(new Rect(810, 50, 120, 25), "Wave " + (WaveHandler.Instance.curWave + 1) + " / " + WaveHandler.Instance.waves, goldStyle);
+
+
+		//Tower building buttons
+		if(GUI.Button(new Rect(810, 80, 145, 40), "Arrow Tower")){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
+
+		if(GUI.Button(new Rect(810, 130, 145, 40), "Poison Tower")){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
+
+		if(GUI.Button(new Rect(810, 180, 145, 40), "Bomb Tower")){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
+
+		if(GUI.Button(new Rect(810, 230, 145, 40), "Frost Tower")){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
 
 		if(towerSelected) {
 			Vector3 up = Camera.main.WorldToScreenPoint(curSelectedTower.transform.position);
@@ -297,7 +314,7 @@ public class InteractionHandler : MonoBehaviour {
 			int height = 20;
 
 			if(tmpTower.level % 4 != 0) {
-				if(GUI.Button(new Rect(up.x - width / 2 - 22, Screen.height - up.y - offSetY - 20, width + 44, height + 20), "Upgrade for " + tmpTower.cost + ", gives \n 4*dmg and +specials")) {
+				if(GUI.Button(new Rect(up.x - width / 2 - 25, Screen.height - up.y - offSetY - 20, width + 50, height + 20), "Upgrade for " + tmpTower.cost + ", gives \n 4*dmg and +specials")) {
 					if(curGold - tmpTower.cost >= 0) {
 						UpgradeTower();
 					}
@@ -330,38 +347,62 @@ public class InteractionHandler : MonoBehaviour {
 			int startPos = 320;
 
 			//Show stats for the current tower
-			GUI.Label(new Rect(810, startPos, 145, 25), "Name: " + tmpTower.name);
-			GUI.Label(new Rect(810, startPos + 20, 145, 25), "Level: " + tmpTower.level);
-			GUI.Label(new Rect(810, startPos + 40, 145, 25), "Damage: " + tmpTower.damage);
-			GUI.Label(new Rect(810, startPos + 60, 145, 25), "Attack Cooldown: " + tmpTower.fireRateCoolDown);
+			GUI.Label(new Rect(810, startPos, 100, 25), "Name: ", goldStyle);
+			GUI.Label(new Rect(855, startPos, 100, 25), tmpTower.name, normalStyle);
+			GUI.Label(new Rect(810, startPos + 20, 145, 25), "Level: ", goldStyle);
+			GUI.Label(new Rect(850, startPos + 20, 145, 25), tmpTower.level.ToString(), normalStyle);
+			GUI.Label(new Rect(810, startPos + 40, 145, 25), "Damage: ", goldStyle);
+			GUI.Label(new Rect(870, startPos + 40, 145, 25), tmpTower.damage.ToString(), normalStyle);
+			GUI.Label(new Rect(810, startPos + 60, 145, 25), "Attack Cooldown: ", goldStyle);
+			GUI.Label(new Rect(923, startPos + 60, 145, 25), tmpTower.fireRateCoolDown + "s", normalStyle);
 			if(tmpTower.towerType == TowerType.Arrow) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: None");
-				GUI.Label(new Rect(810, startPos + 100, 145, 100), "Attack Type: " + tmpTower.attackType + " - " + tmpTower.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(905, startPos + 80, 145, 100), "None", normalStyle);
+				GUI.Label(new Rect(810, startPos + 100, 145, 25), tmpTower.attackType + " Attacks: ", goldStyle);
+				GUI.Label(new Rect(810, startPos + 113, 145, 100), tmpTower.aboutTower);
+				
 			} else if (tmpTower.towerType == TowerType.Bomb) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: Bombs gives AoE damage");
-				GUI.Label(new Rect(810, startPos + 120, 145, 100), "Attack Type: " + tmpTower.attackType + " - " + tmpTower.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 93, 145, 100), "Bombs deal AoE damage");
+				GUI.Label(new Rect(810, startPos + 131, 145, 25), tmpTower.attackType + " Attacks:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 144, 145, 100), tmpTower.aboutTower);
+				
 			} else if (tmpTower.towerType == TowerType.Poison) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: Applies a DoT to creep");
-				GUI.Label(new Rect(810, startPos + 120, 145, 100), "DoT: " + tmpTower.dotDamage + "d/1s for 5s");
-				GUI.Label(new Rect(810, startPos + 140, 145, 100), "Attack Type: " + tmpTower.attackType + " - " + tmpTower.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 93, 145, 100), "Applies a DoT to creep");
+				GUI.Label(new Rect(810, startPos + 116, 145, 100), "DoT: ", goldStyle);
+				GUI.Label(new Rect(842, startPos + 116, 145, 100), tmpTower.dotDamage + "d/1s for 5s", normalStyle);
+				GUI.Label(new Rect(810, startPos + 136, 145, 100), tmpTower.attackType + " Attacks:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 149, 145, 100),  tmpTower.aboutTower);
 			} else if (tmpTower.towerType == TowerType.Frost) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: Crippling creeps run speed");
-				GUI.Label(new Rect(810, startPos + 120, 145, 100), "Slow: " + (tmpTower.slow * 100) + "% for 5s");
-				GUI.Label(new Rect(810, startPos + 140, 145, 100), "Attack Type: " + tmpTower.attackType + " - " + tmpTower.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 93, 145, 100), "Slows down an enemy creep");
+				GUI.Label(new Rect(810, startPos + 131, 145, 100), "Slow: ", goldStyle);
+				GUI.Label(new Rect(850, startPos + 131, 145, 100), (tmpTower.slow * 100) + "% for 5s", normalStyle);
+				GUI.Label(new Rect(810, startPos + 149, 145, 100), tmpTower.attackType + " Attacks:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 162, 145, 100),  tmpTower.aboutTower);
 			}
 		}
 
 		if(creepSelected) {
 			Enemy tmpEnemy = curCreepSelected.GetComponent<Enemy>();
 
-			GUI.Label(new Rect(810, 400, 145, 25), "Name: " + tmpEnemy.name);
-			GUI.Label(new Rect(810, 420, 145, 25), "Level: " + tmpEnemy.Level);
-			GUI.Label(new Rect(810, 440, 145, 25), "HP: " + tmpEnemy.health + " / " + tmpEnemy.CurStartHealth);
-			GUI.Label(new Rect(810, 460, 145, 25), "Run Speed: " + tmpEnemy.moveSpeed);
-			GUI.Label(new Rect(810, 480, 145, 25), "Slow Resistance: " + (tmpEnemy.slowResistance * 100) + "%");
-			GUI.Label(new Rect(810, 500, 145, 25), "Poison Armor: " + tmpEnemy.poisonResistance);
-			GUI.Label(new Rect(810, 520, 145, 25), "Armor: " + tmpEnemy.armor);
-			GUI.Label(new Rect(810, 540, 145, 50), "Armor Type: " + tmpEnemy.armorType);
+			GUI.Label(new Rect(810, 320, 145, 25), "Name: ", goldStyle);
+			GUI.Label(new Rect(855, 320, 145, 25), tmpEnemy.name, normalStyle);
+			GUI.Label(new Rect(810, 340, 145, 25), "Level: ", goldStyle);
+			GUI.Label(new Rect(852, 340, 145, 25), tmpEnemy.Level.ToString(), normalStyle);
+			GUI.Label(new Rect(810, 360, 145, 25), "HP: ", goldStyle);
+			GUI.Label(new Rect(835, 360, 145, 25), tmpEnemy.health + " / " + tmpEnemy.CurStartHealth, normalStyle);
+			GUI.Label(new Rect(810, 380, 145, 25), "Run Speed: ", goldStyle);
+			GUI.Label(new Rect(885, 380, 145, 25), tmpEnemy.moveSpeed.ToString(), normalStyle);
+			GUI.Label(new Rect(810, 400, 145, 25), "Slow Resistance: ", goldStyle);
+			GUI.Label(new Rect(920, 400, 145, 25), (tmpEnemy.slowResistance * 100) + "%", normalStyle);
+			GUI.Label(new Rect(810, 420, 145, 25), "Poison Armor: ", goldStyle);
+			GUI.Label(new Rect(905, 420, 145, 25), tmpEnemy.poisonResistance.ToString(), normalStyle);
+			GUI.Label(new Rect(810, 440, 145, 25), "Armor: ", goldStyle);
+			GUI.Label(new Rect(857, 440, 145, 25), tmpEnemy.armor.ToString(), normalStyle);
+			GUI.Label(new Rect(810, 460, 145, 50), "Armor Type: ", goldStyle);
+			GUI.Label(new Rect(810, 473, 145, 50), tmpEnemy.armorType.ToString());
 
 			if(!tmpEnemy.gameObject.activeSelf) {
 				creepSelected = false;
@@ -369,28 +410,44 @@ public class InteractionHandler : MonoBehaviour {
 			}
 		}
 
-		if(showTowerStats) {
+		if(showTowerStats && !towerSelected) {
 
 			int startPos = 320;
 
-			GUI.Label(new Rect(810, startPos, 145, 25), "Name: " + curT.name);
-			GUI.Label(new Rect(810, startPos + 20, 145, 25), "Level: " + curT.level);
-			GUI.Label(new Rect(810, startPos + 40, 145, 25), "Damage: " + curT.damage);
-			GUI.Label(new Rect(810, startPos + 60, 145, 25), "Attack Cooldown: " + curT.fireRateCoolDown);
+			GUI.Label(new Rect(810, startPos, 100, 25), "Name: ", goldStyle);
+			GUI.Label(new Rect(855, startPos, 100, 25), curT.name, normalStyle);
+			GUI.Label(new Rect(810, startPos + 20, 145, 25), "Cost: ", goldStyle);
+			GUI.Label(new Rect(845, startPos + 20, 145, 25), curT.cost.ToString(), normalStyle);
+			GUI.Label(new Rect(810, startPos + 40, 145, 25), "Damage: ", goldStyle);
+			GUI.Label(new Rect(870, startPos + 40, 145, 25), curT.damage.ToString(), normalStyle);
+			GUI.Label(new Rect(810, startPos + 60, 145, 25), "Attack Cooldown: ", goldStyle);
+			GUI.Label(new Rect(923, startPos + 60, 145, 25), curT.fireRateCoolDown + "s", normalStyle);
 			if(curT.towerType == TowerType.Arrow) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: None");
-				GUI.Label(new Rect(810, startPos + 100, 145, 100), "Attack Type: " + curT.attackType + " - " + curT.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(905, startPos + 80, 145, 100), "None", normalStyle);
+				GUI.Label(new Rect(810, startPos + 100, 145, 25), curT.attackType + " Attacks: ", goldStyle);
+				GUI.Label(new Rect(810, startPos + 113, 145, 100), curT.aboutTower);
+
 			} else if (curT.towerType == TowerType.Bomb) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: Bombs gives AoE damage");
-				GUI.Label(new Rect(810, startPos + 120, 145, 100), "Attack Type: " + curT.attackType + " - " + curT.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 93, 145, 100), "Bombs deal AoE damage");
+				GUI.Label(new Rect(810, startPos + 131, 145, 25), curT.attackType + " Attacks:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 144, 145, 100), curT.aboutTower);
+
 			} else if (curT.towerType == TowerType.Poison) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: Applies a DoT to creep");
-				GUI.Label(new Rect(810, startPos + 120, 145, 100), "DoT: " + curT.dotDamage + "d/1s for 5s");
-				GUI.Label(new Rect(810, startPos + 140, 145, 100), "Attack Type: " + curT.attackType + " - " + curT.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 93, 145, 100), "Applies a DoT to creep");
+				GUI.Label(new Rect(810, startPos + 116, 145, 100), "DoT: ", goldStyle);
+				GUI.Label(new Rect(842, startPos + 116, 145, 100), curT.dotDamage + "d/1s for 5s", normalStyle);
+				GUI.Label(new Rect(810, startPos + 136, 145, 100), curT.attackType + " Attacks:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 149, 145, 100),  curT.aboutTower);
 			} else if (curT.towerType == TowerType.Frost) {
-				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack: Crippling creeps run speed");
-				GUI.Label(new Rect(810, startPos + 120, 145, 100), "Slow: " + (curT.slow * 100) + "% for 5s");
-				GUI.Label(new Rect(810, startPos + 140, 145, 100), "Attack Type: " + curT.attackType + " - " + curT.aboutTower);
+				GUI.Label(new Rect(810, startPos + 80, 145, 100), "Special Attack:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 93, 145, 100), "Slows down an enemy creep");
+				GUI.Label(new Rect(810, startPos + 131, 145, 100), "Slow: ", goldStyle);
+				GUI.Label(new Rect(850, startPos + 131, 145, 100), (curT.slow * 100) + "% for 5s", normalStyle);
+				GUI.Label(new Rect(810, startPos + 149, 145, 100), curT.attackType + " Attacks:", goldStyle);
+				GUI.Label(new Rect(810, startPos + 162, 145, 100),  curT.aboutTower);
 			}
 		}
 	}

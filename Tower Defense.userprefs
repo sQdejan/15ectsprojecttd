@@ -1,15 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/#Scripts/EA/EAWaveHandler.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/#Scripts/Enemies/Enemy.cs">
     <Files>
-      <File FileName="Assets/#Scripts/Towers/Tower.cs" Line="124" Column="59" />
-      <File FileName="Assets/#Scripts/Enemies/Enemy.cs" Line="80" Column="11" />
-      <File FileName="Assets/#Scripts/Misc/InteractionHandler.cs" Line="26" Column="43" />
-      <File FileName="Assets/#Scripts/Towers/Projectile.cs" Line="68" Column="1" />
-      <File FileName="Assets/#Scripts/EA/EAWaveHandler.cs" Line="129" Column="34" />
-      <File FileName="Assets/#Scripts/EA/EAWaveGenome.cs" Line="177" Column="29" />
-      <File FileName="Assets/#Scripts/EA/WaveHandler.cs" Line="63" Column="3" />
-      <File FileName="Assets/#Scripts/Enemies/HealthBar.cs" Line="30" Column="1" />
+      <File FileName="Assets/#Scripts/Test/TestResults.cs" Line="20" Column="23" />
+      <File FileName="Assets/#Scripts/Enemies/Enemy.cs" Line="107" Column="1" />
+      <File FileName="Assets/#Scripts/Towers/Tower.cs" Line="162" Column="57" />
+      <File FileName="Assets/#Scripts/Misc/InteractionHandler.cs" Line="298" Column="27" />
+      <File FileName="Assets/#Scripts/EA/WaveHandler.cs" Line="35" Column="25" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

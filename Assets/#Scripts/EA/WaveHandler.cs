@@ -32,7 +32,7 @@ public class WaveHandler : MonoBehaviour {
 
 	private List<HealthBar> healthBars = new List<HealthBar>();
 
-	private int curWave = 0;
+	public int curWave = 0;
 
 #endregion
 

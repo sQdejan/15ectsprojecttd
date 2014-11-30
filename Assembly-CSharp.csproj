@@ -58,6 +58,7 @@
      <Compile Include="Assets\#Scripts\Misc\CountChild.cs" />
      <Compile Include="Assets\#Scripts\Misc\InteractionHandler.cs" />
      <Compile Include="Assets\#Scripts\Misc\Test.cs" />
+     <Compile Include="Assets\#Scripts\Test\TestResults.cs" />
      <Compile Include="Assets\#Scripts\Towers\Projectile.cs" />
      <Compile Include="Assets\#Scripts\Towers\ProjectileArrow.cs" />
      <Compile Include="Assets\#Scripts\Towers\ProjectileBomb.cs" />

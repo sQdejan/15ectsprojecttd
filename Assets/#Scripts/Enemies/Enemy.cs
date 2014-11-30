@@ -34,6 +34,7 @@ public class Enemy : MonoBehaviour {
 	private Transform thisTransform;
 	private float startMoveSpeed;
 	private Vector3 startPosition;
+	private Animator thisAnimator;
 
 	private List<Transform> waypointsRight = new List<Transform>();
 	private List<Transform> waypointsLeft = new List<Transform>();
@@ -91,6 +92,7 @@ public class Enemy : MonoBehaviour {
 		}
 
 		thisTransform = transform;
+		thisAnimator = GetComponent<Animator>();
 		startPosition = transform.position;
 		startMoveSpeed = moveSpeed;
 
@@ -137,9 +139,9 @@ public class Enemy : MonoBehaviour {
 	//Calculate in what direction to move at
 	void WalkDirection()
 	{
-		Vector3 dir = waypointsCurrent[curWaypointIndex].position - thisTransform.position;
-		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-		thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+//		Vector3 dir = waypointsCurrent[curWaypointIndex].position - thisTransform.position;
+//		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+//		thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 		direction = (waypointsCurrent[curWaypointIndex].position - thisTransform.position).normalized;
 	}
 
@@ -161,6 +163,12 @@ public class Enemy : MonoBehaviour {
 			waypointsCurrent = waypointsLeftEA;
 		} else if(waypointPoolToUse == 3){
 			waypointsCurrent = waypointsRightEA;
+		}
+
+		if(amIEA) {
+			thisAnimator.enabled = false;
+		} else {
+			thisAnimator.enabled = true;
 		}
 
 		gameObject.SetActive(true);
