@@ -260,6 +260,8 @@ public class InteractionHandler : MonoBehaviour {
 	Rect bRect = new Rect(810, 380, 145, 40);
 	Rect fRect = new Rect(810, 330, 145, 40);
 
+	Color oriColor;
+
 	void OnGUI()
 	{
 		GUI.skin.label.wordWrap = true;
@@ -284,7 +286,7 @@ public class InteractionHandler : MonoBehaviour {
 			showTowerStats = false;
 		}
 
-		
+		oriColor = GUI.contentColor;
 		//For economy
 		GUI.Label(new Rect(810, 10, 120, 20), "$$: " + (int)curGold, goldStyle);
 		
@@ -294,14 +296,33 @@ public class InteractionHandler : MonoBehaviour {
 		//For waves
 		GUI.Label(new Rect(810, 50, 120, 25), "Wave " + (WaveHandler.Instance.curWave + 1) + " / " + WaveHandler.Instance.waves, goldStyle);
 
-
 		//Tower building buttons
+		if(curGold - arrowTowerCost >= 0) {
+			GUI.contentColor = Color.green;
+		} else {
+			GUI.contentColor = Color.red;
+		}
 		if(GUI.Button(new Rect(810, 80, 145, 40), "Arrow Tower")){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
 
+		if(curGold - poisonTowerCost >= 0) {
+			GUI.contentColor = Color.green;
+		} else {
+			GUI.contentColor = Color.red;
+		}
 		if(GUI.Button(new Rect(810, 130, 145, 40), "Poison Tower")){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
 
+		if(curGold - bombTowerCost >= 0) {
+			GUI.contentColor = Color.green;
+		} else {
+			GUI.contentColor = Color.red;
+		}
 		if(GUI.Button(new Rect(810, 180, 145, 40), "Bomb Tower")){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
 
+		if(curGold - frostTowerCost >= 0) {
+			GUI.contentColor = Color.green;
+		} else {
+			GUI.contentColor = Color.red;
+		}
 		if(GUI.Button(new Rect(810, 230, 145, 40), "Frost Tower")){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
 
 		if(towerSelected) {
@@ -313,6 +334,12 @@ public class InteractionHandler : MonoBehaviour {
 			int width = 100;
 			int height = 20;
 
+			if(curGold - tmpTower.cost >= 0) {
+				GUI.contentColor = Color.green;
+			} else {
+				GUI.contentColor = Color.red;
+			}
+
 			if(tmpTower.level % 4 != 0) {
 				if(GUI.Button(new Rect(up.x - width / 2 - 25, Screen.height - up.y - offSetY - 20, width + 50, height + 20), "Upgrade for " + tmpTower.cost + ", gives \n 4*dmg and +specials")) {
 					if(curGold - tmpTower.cost >= 0) {
@@ -320,6 +347,8 @@ public class InteractionHandler : MonoBehaviour {
 					}
 				}
 			}
+
+			GUI.contentColor = oriColor;
 
 			if(GUI.Button(new Rect(up.x - width / 2, Screen.height - up.y + (offSetY - height), width, height), "Sell for " + (int)((float)tmpTower.curNetWorth * 0.75f))) {
 
@@ -383,6 +412,8 @@ public class InteractionHandler : MonoBehaviour {
 				GUI.Label(new Rect(810, startPos + 162, 145, 100),  tmpTower.aboutTower);
 			}
 		}
+
+		GUI.contentColor = oriColor;
 
 		if(creepSelected) {
 			Enemy tmpEnemy = curCreepSelected.GetComponent<Enemy>();
