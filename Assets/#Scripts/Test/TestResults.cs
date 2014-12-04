@@ -90,7 +90,6 @@ public class TestResults : MonoBehaviour {
 		if(!string.IsNullOrEmpty(www.error)) {
 			Debug.Log(www.error);
 		}
-		Debug.Log("Updated results");
 	}
 	
 	IEnumerator EndResults() {
@@ -147,14 +146,14 @@ public class TestResults : MonoBehaviour {
 
 	}
 
-	int eOffset = 225;
-	int yOffsetE = 50;
+	int eOffset = 200;
+	int yOffsetE = 65;
 
 	void Enjoyment()
 	{
-		GUI.Label(new Rect(300, 25, 200, 20), "How much are you ready?", heading);
+		GUI.Label(new Rect(250, 40, 200, 20), "How enjoyable was the game?", heading);
 
-		GUI.Label(new Rect(150, yOffsetE + 3, 100, 30), "Hate it",myStyle);
+		GUI.Label(new Rect(100, yOffsetE + 3, 100, 30), "Annoying",myStyle);
 
 		if(GUI.Toggle(new Rect(eOffset, yOffsetE, 30, 30), e1, ""))
 		{
@@ -250,16 +249,16 @@ public class TestResults : MonoBehaviour {
 			eFilled = true;
 		}
 
-		GUI.Label(new Rect(350 + eOffset, yOffsetE + 3, 100, 30), "Love it", myStyle);
+		GUI.Label(new Rect(340 + eOffset, yOffsetE + 3, 100, 30), "Enjoyable", myStyle);
 	}
 
-	int yOffsetA = 150;
+	int yOffsetA = 165;
 
 	void Adaptable()
 	{
-		GUI.Label(new Rect(300, yOffsetA - 25, 200, 20), "How much are you ready?", heading);
+		GUI.Label(new Rect(220, yOffsetA - 25, 200, 20), "How adaptable did you find the waves?", heading);
 		
-		GUI.Label(new Rect(150, yOffsetA + 3, 100, 30), "Hate it", myStyle);
+		GUI.Label(new Rect(100, yOffsetA + 3, 100, 30), "Not adaptable", myStyle);
 		
 		if(GUI.Toggle(new Rect(eOffset, yOffsetA, 30, 30), a1, ""))
 		{
@@ -353,7 +352,7 @@ public class TestResults : MonoBehaviour {
 			aFilled = true;
 		}
 		
-		GUI.Label(new Rect(350 + eOffset, yOffsetA + 3, 100, 30), "Love it", myStyle);
+		GUI.Label(new Rect(340 + eOffset, yOffsetA + 3, 100, 30), "Very adaptable", myStyle);
 	}
 
 	void Comment()

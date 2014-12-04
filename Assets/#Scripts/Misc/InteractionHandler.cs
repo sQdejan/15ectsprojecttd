@@ -194,7 +194,7 @@ public class InteractionHandler : MonoBehaviour {
 		tmpTower.tileReplaced = lastTileHit;
 		tmpTower.curNetWorth = tmpTower.cost;
 		curGold -= tmpTower.cost;
-		tmpTower.cost *= 4f;
+		tmpTower.cost *= 3f;
 
 		switch(tmpTower.towerType) {
 		case TowerType.Arrow:
@@ -236,7 +236,7 @@ public class InteractionHandler : MonoBehaviour {
 		tmpTower.slow += 0.1f;
 		tmpTower.curNetWorth += tmpTower.cost;
 		curGold -= tmpTower.cost;
-		tmpTower.cost *= 4f;
+		tmpTower.cost *= 3f;
 
 		towerinfo += "U" + tmpTower.level + "P" + tmpTower.tileReplaced.name + "-";
 	}
@@ -300,7 +300,6 @@ public class InteractionHandler : MonoBehaviour {
 	bool pause = false;
 	bool sheetActice = true;
 
-	int lol = 0;
 	void OnGUI()
 	{
 		if(pause) {
@@ -420,7 +419,7 @@ public class InteractionHandler : MonoBehaviour {
 				GUI.contentColor = Color.red;
 			}
 
-			if(tmpTower.level % 3 != 0) {
+			if(tmpTower.level % 2 != 0) {
 				if(GUI.Button(new Rect(up.x - width / 2 - 25, Screen.height - up.y - offSetY - 20, width + 50, height + 20), "Upgrade for " + tmpTower.cost + ", gives \n 4*dmg and +specials")) {
 					if(curGold - tmpTower.cost >= 0) {
 						UpgradeTower();
