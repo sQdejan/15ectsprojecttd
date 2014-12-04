@@ -109,7 +109,7 @@ public class EAEnemy : MonoBehaviour {
 	
 	void Terminate()
 	{
-		EAWaveHandler.totalTravelTime += travelTime;
+//		EAWaveHandler.totalTravelTime += travelTime;
 
 		travelTime = 0;
 		curWaypointIndex = 0;

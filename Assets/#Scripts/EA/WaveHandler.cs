@@ -16,9 +16,16 @@ public class WaveHandler : MonoBehaviour {
 	public int waves;
 	public float timeBetweenWaves = 15f;
 	public float spawnTimeBetweenEnemies = 0.5f;
+	public int curWave = 0;
 	
 	public static int enemiesDone = 0; 
+	public static float damageTaken = 0;
 	public static EAWaveGenome genome;
+	public static bool amIRunning = false;
+
+	public static string waveinfo = "";
+	public static int score = 0;
+
 
 	//Privates
 	private static WaveHandler instance;
@@ -32,8 +39,8 @@ public class WaveHandler : MonoBehaviour {
 
 	private List<HealthBar> healthBars = new List<HealthBar>();
 
-	public int curWave = 0;
-
+	private float waveMaxHealth = 0;
+	
 #endregion
 
 	private WaveHandler() {}
@@ -61,7 +68,7 @@ public class WaveHandler : MonoBehaviour {
 
 		foreach(Transform t in healthBarPool.transform) { healthBars.Add(t.GetComponent<HealthBar>()); }
 
-		StartCoroutine("FirstWave");
+//		StartCoroutine("FirstWave");
 	}
 	
 	void FixedUpdate()
@@ -71,9 +78,10 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		if(enemiesDone >= waveSize) {
+			score += (int)(damageTaken / waveMaxHealth * 100);
+			damageTaken = 0;
 			enemiesDone = 0;
-			Debug.Log("Wave " + (curWave) + " is over");
-			if(++curWave <= waves) {
+			if(++curWave < waves) {
 				foreach(Enemy e in warriors) { e.LevelUp(); }
 				foreach(Enemy e in mages) { e.LevelUp(); }
 				foreach(Enemy e in rogues) { e.LevelUp(); }
@@ -81,29 +89,48 @@ public class WaveHandler : MonoBehaviour {
 
 				foreach(HealthBar h in healthBars) { h.Disable(); }
 
+				amIRunning = false;
 				EAWaveHandler.Instance.StartEAProcess();
+			} else {
+				curWave--;
+				InteractionHandler.gameOver = true;
+				amIRunning = false;
 			}
 		}
 	}
 
 	public void StartWaveHandler()
 	{
-		StartCoroutine(WaveWaiting());
+		CreateGenomeString();
+		TestResults.Instance.UpdateResults();
+//		StartCoroutine(WaveWaiting());
+		amIRunning = true;
+		StartCoroutine("SpawnWaves");
+	}
+
+	void CreateGenomeString()
+	{
+		for(int i = 0; i < genome.Chromosome.Length; i++) {
+			waveinfo += genome.Chromosome[i].ToString() + ",";
+		}
+
+		waveinfo += "-";
 	}
 
 	void StopGame()
 	{
 		StopAllCoroutines();
+		amIRunning = false;
 
 		foreach(HealthBar h in healthBars) { h.Disable(); }
 
 		//Maybe just let it run out
 		foreach(Enemy e in leftWave) {
-			e.TakeDamage(float.MaxValue, AttackType.Normal);
+			e.Terminate();
 		}
 
 		foreach(Enemy e in rightWave) {
-			e.TakeDamage(float.MaxValue, AttackType.Normal);
+			e.Terminate();
 		}
 	}
 
@@ -228,6 +255,18 @@ public class WaveHandler : MonoBehaviour {
 			}
 
 			tmpIndex++;
+		}
+
+		
+		waveMaxHealth = 0;
+		
+		//Calculate max health
+		foreach(Enemy e in leftWave) {
+			waveMaxHealth += e.health;
+		}
+		
+		foreach(Enemy e in rightWave) {
+			waveMaxHealth += e.health;
 		}
 	}	
 }

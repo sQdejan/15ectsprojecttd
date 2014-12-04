@@ -19,10 +19,11 @@ public class EAWaveHandler : MonoBehaviour {
 	public float spawnTimeBetweenEnemies = 0.5f;
 	public int waveSize = 30;
 	public int generations = 1;
+	public int curGeneration = 1;
 
 	public static int enemiesDone = 0;
 	public static float totalDamageTaken = 0; //Probably for fitness
-	public static float totalTravelTime = 0; //Probably for fitness
+//	public static float totalTravelTime = 0; //Probably for fitness
 	public static int enemiesDied = 0;
 
 	public static bool amIRunning = false;
@@ -46,7 +47,6 @@ public class EAWaveHandler : MonoBehaviour {
 
 	private float time; //FOR MEASUREMENTS
 	private float waveMaxHealth;
-	private int curGeneration = 1;
 	private int curWave = 0;
 
 	const int MAX_TRAVEL_TIME = 22000; 
@@ -101,13 +101,13 @@ public class EAWaveHandler : MonoBehaviour {
 //			Debug.Log("EAWavehandler " + enemiesDied);
 			enemiesDone = 0;
 			population[curWave].fitnessDamage = totalDamageTaken / waveMaxHealth; //Low == good
-			population[curWave].fitnessTravel = totalTravelTime / MAX_TRAVEL_TIME; //High == good
+//			population[curWave].fitnessTravel = totalTravelTime / MAX_TRAVEL_TIME; //High == good
 			population[curWave].fitnessEnemiesDied = (float)enemiesDied / waveSize; //Low == good
-			population[curWave].totalFitness = 2 - population[curWave].fitnessDamage - population[curWave].fitnessEnemiesDied + population[curWave].fitnessTravel; 
+			population[curWave].totalFitness = 2 - population[curWave].fitnessDamage - population[curWave].fitnessEnemiesDied; 
 			population[curWave].haveIbeenTested = true;
 			enemiesDied = 0;
 			totalDamageTaken = 0;
-			totalTravelTime = 0;
+//			totalTravelTime = 0;
 
 			if(curWave < SIZE_OF_POPULATION - 1) {
 				StartCoroutine(SpawnWaves());
@@ -122,7 +122,7 @@ public class EAWaveHandler : MonoBehaviour {
 					amIRunning = false;
 					ShutDownTowers();
 					WaveHandler.genome = population[0];
-					WaveHandler.Instance.StartWaveHandler();
+//					WaveHandler.Instance.StartWaveHandler();
 
 					//Reset population for next round
 					for(int i = 0; i < SIZE_OF_POPULATION; i++) {
@@ -267,7 +267,7 @@ public class EAWaveHandler : MonoBehaviour {
 //
 //		Debug.Log(sorted);
 
-//		Debug.Log("Generation " + curGeneration + " travel fitness = " + population[0].fitnessTravel + " enemies that died = " + population[0].fitnessEnemiesDied + " - % damage = " + population[0].fitnessDamage + " total fitness = " + population[0].totalFitness);
+//		Debug.Log("Generation " + curGeneration + " enemies that died = " + population[0].fitnessEnemiesDied + " - % damage = " + population[0].fitnessDamage + " total fitness = " + population[0].totalFitness);
 	}
 	
 	void ProduceNextGeneration()

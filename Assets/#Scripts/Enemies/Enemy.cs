@@ -177,7 +177,7 @@ public class Enemy : MonoBehaviour {
 	}
 	
 	//When enemy is dead or reached goal reset the stats
-	void Terminate()
+	public void Terminate()
 	{
 		//For updating when the last enemy has died == wave over
 		if(!amIEA) {
@@ -188,7 +188,7 @@ public class Enemy : MonoBehaviour {
 
 		} else {
 			health = curStartHealth;
-			EAWaveHandler.totalTravelTime += travelTime;
+//			EAWaveHandler.totalTravelTime += travelTime;
 			EAWaveHandler.enemiesDone++;
 		}
 
@@ -294,6 +294,8 @@ public class Enemy : MonoBehaviour {
 
 		if(amIEA){
 			EAWaveHandler.totalDamageTaken += damage;
+		} else {
+			WaveHandler.damageTaken += damage;
 		}
 
 		if(health <= 0) {
@@ -301,6 +303,7 @@ public class Enemy : MonoBehaviour {
 				EAWaveHandler.totalDamageTaken += health;
 				EAWaveHandler.enemiesDied++;
 			} else {
+				WaveHandler.damageTaken += health;
 				Bounty();
 			}
 
@@ -330,11 +333,17 @@ public class Enemy : MonoBehaviour {
 		for(int i = 0; i < 5; i++) {
 			dotDamage *= 1f - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f));
 			health -= dotDamage;
+			if(amIEA){
+				EAWaveHandler.totalDamageTaken += dotDamage;
+			} else {
+				WaveHandler.damageTaken += dotDamage;
+			}
 			if(health <= 0) {
 				if(amIEA) {
 					EAWaveHandler.totalDamageTaken += health;
 					EAWaveHandler.enemiesDied++;
 				} else {
+					WaveHandler.damageTaken += health;
 					Bounty ();
 				}
 				Terminate();

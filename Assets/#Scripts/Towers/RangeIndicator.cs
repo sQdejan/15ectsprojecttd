@@ -29,7 +29,7 @@ public sealed class RangeIndicator : MonoBehaviour {
 		startPosition = transform.position;
 	}
 
-	void FixedUpdate()
+	void Update()
 	{
 		if(selected) {
 			thisTransform.localScale = scaleVector;

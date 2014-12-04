@@ -19,6 +19,7 @@ public class Tower : MonoBehaviour {
 	public float dotDamage;
 	public float slow;
 	public bool aimFrontEnemy = false;
+	public bool notEATower = false;
 	public TowerType towerType;
 	public AttackType attackType;
 	public string aboutTower = "";
@@ -70,7 +71,7 @@ public class Tower : MonoBehaviour {
 
 	void FixedUpdate()
 	{
-		if(EAWaveHandler.amIRunning)
+		if(notEATower && EAWaveHandler.amIRunning) 
 			return;
 //		Debug.DrawLine(thisTransform.position, thisTransform.position + Vector3.up * radius);
 //		Debug.DrawLine(thisTransform.position, thisTransform.position - Vector3.up * radius);
@@ -78,7 +79,11 @@ public class Tower : MonoBehaviour {
 //		Debug.DrawLine(thisTransform.position, thisTransform.position - Vector3.right * radius);
 
 		if(!available) {
-			Targeting();
+			if(!notEATower && canShoot) {
+				Targeting();
+			} else {
+				Targeting();
+			}
 
 			if(canShoot && curTarget) {
 				Shooting();
@@ -86,17 +91,23 @@ public class Tower : MonoBehaviour {
 		}
 	}
 
+	Collider2D[] hits = new Collider2D[30];
+
 	void Targeting()
 	{
 		//Get all colliders within the radius, get all enemy scripts into an array and sort it comparing TravelTime
-		Collider2D[] hits = Physics2D.OverlapCircleAll(thisTransform.position.To2DVector(), radius, targetLayer);
-		if(hits.Length > 0) {
+
+//		Collider2D[] hits = Physics2D.OverlapCircleAll(thisTransform.position.To2DVector(), radius, targetLayer);
+
+		int k = Physics2D.OverlapCircleNonAlloc(thisTransform.position.To2DVector(), radius, hits, targetLayer);
+
+		if(k > 0) {
 			bool findNewTarget = true;
 
 			//The frost tower will always need to aim front target so I skip this test
 			if(!aimFrontEnemy) {
 				//Check if current target still within radius, if so, keep that as target
-				for(int i = 0; i < hits.Length; i++) {
+				for(int i = 0; i < k; i++) {
 					if(hits[i].gameObject == curTarget) {
 						findNewTarget = false;
 						break;
@@ -105,17 +116,27 @@ public class Tower : MonoBehaviour {
 			}
 
 			if(findNewTarget) {
-				Enemy[] hitsObjects = Array.ConvertAll(hits, item => item.gameObject.GetComponent<Enemy>());
-				//Sort it so highest value comes first
-				Array.Sort(hitsObjects, delegate (Enemy enemy1, Enemy enemy2){
+				List<Enemy> enemies = new List<Enemy>();
+
+				for(int i = 0; i < k; i++) {
+					enemies.Add(hits[i].GetComponent<Enemy>());
+				}
+//				Enemy[] hitsObjects = Array.ConvertAll(hits, item => item.gameObject.GetComponent<Enemy>());
+					//Sort it so highest value comes first
+//				Array.Sort(hitsObjects, delegate (Enemy enemy1, Enemy enemy2){
+//					return enemy2.TravelTime.CompareTo(enemy1.TravelTime);
+//				});
+				enemies.Sort(delegate (Enemy enemy1, Enemy enemy2){
 					return enemy2.TravelTime.CompareTo(enemy1.TravelTime);
 				});
-				curTarget = hitsObjects[0].gameObject;
+				curTarget = enemies[0].gameObject;
 			}
 
-			Vector3 dir = curTarget.transform.position - thisTransform.position;
-			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-			thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+			if(notEATower) {
+				Vector3 dir = curTarget.transform.position - thisTransform.position;
+				float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+				thisTransform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+			}
 		} else {
 			curTarget = null;
 		}

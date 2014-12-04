@@ -121,7 +121,7 @@ public class EAWaveGenome {
 			whichToIncrease = 7;
 		}
 
-		int increaseWith = 1;
+		int increaseWith = 2;
 
 		if(c[whichToIncrease] > waveSize - increaseWith) {
 			increaseWith = waveSize - c[whichToIncrease];
@@ -170,11 +170,11 @@ public class EAWaveGenome {
 
 			//I leave 1 percent so there is a change that it will go the other way
 			if(c[whichToChange] < upOrDown) {
-				if(c[whichToChange] > 10) {
+				if(c[whichToChange] > 6) {
 					c[whichToChange] -= 5;
 				}
 			} else {
-				if(c[whichToChange] < 90) {
+				if(c[whichToChange] < 94) {
 					c[whichToChange] += 5;
 				}
 			}

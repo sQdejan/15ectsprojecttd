@@ -16,6 +16,7 @@ public class InteractionHandler : MonoBehaviour {
 	public Sprite selectedSpirit;
 	public LayerMask layersToHit; //For the unit selection interaction
 	public float startGold = 250;
+	public bool randomMode = false;
 
 	public GameObject arrowTower;
 	public GameObject poisonTower;
@@ -25,8 +26,13 @@ public class InteractionHandler : MonoBehaviour {
 	public GUIStyle goldStyle;
 	public GUIStyle normalStyle;
 
+	public static int playerID;
+	public static string mode;
+	public static string towerinfo = "";
+	public static int score = 0;
+
 	public static float curGold = 100;
-	public static int lifesRemaining = 50;
+	public static int lifesRemaining = 900;
 	public static bool gameOver = false;
 	public static List<Tower> currentArrowTowers = new List<Tower>();
 	public static List<Tower> currentPoisonTowers = new List<Tower>();
@@ -71,6 +77,16 @@ public class InteractionHandler : MonoBehaviour {
 
 	void Start()
 	{
+		playerID = Random.Range(1, 1000000);
+
+		if(randomMode) {
+			mode = "R";
+		} else {
+			mode = "E";
+		}
+
+		TestResults.Instance.SendStart();
+
 		InteractionHandler.curGold = startGold;
 
 		tileLayer = 1 << LayerMask.NameToLayer("Placement");
@@ -95,6 +111,15 @@ public class InteractionHandler : MonoBehaviour {
 
 	void Update () 
 	{
+		if(InteractionHandler.gameOver) {
+			if(curTower) {
+				RangeIndicator.selected = false;
+				curTower.SetActive(false);
+				curTower = null;
+			}
+			return;
+		}
+
 		if(isBuilding) {
 			TowerBuildingInteraction();
 		} else {
@@ -173,17 +198,24 @@ public class InteractionHandler : MonoBehaviour {
 		switch(tmpTower.towerType) {
 		case TowerType.Arrow:
 			currentArrowTowers.Add(tmpTower);
+			towerinfo += "A";
 			break;
 		case TowerType.Poison:
 			currentPoisonTowers.Add(tmpTower);
+			towerinfo += "P";
 			break;
 		case TowerType.Bomb:
 			currentBombTowers.Add(tmpTower);
+			towerinfo += "B";
 			break;
 		case TowerType.Frost:
 			currentFrostTowers.Add(tmpTower);
+			towerinfo += "F";
 			break;
 		}
+
+		towerinfo += WaveHandler.Instance.curWave;
+		towerinfo += "P" + lastTileHit.name + "-";
 
 		RangeIndicator.selected = false;
 		lastTileHit.SetActive(false);
@@ -204,6 +236,8 @@ public class InteractionHandler : MonoBehaviour {
 		tmpTower.curNetWorth += tmpTower.cost;
 		curGold -= tmpTower.cost;
 		tmpTower.cost *= 4f;
+
+		towerinfo += "U" + tmpTower.level + "P" + tmpTower.tileReplaced.name + "-";
 	}
 
 	//This is used for tower and enemy selection
@@ -255,16 +289,61 @@ public class InteractionHandler : MonoBehaviour {
 
 #region GUI related
 
-	Rect aRect = new Rect(810, 480, 145, 40);
-	Rect pRect = new Rect(810, 430, 145, 40);
-	Rect bRect = new Rect(810, 380, 145, 40);
-	Rect fRect = new Rect(810, 330, 145, 40);
+	Rect aRect = new Rect(810, 450, 145, 40);
+	Rect pRect = new Rect(810, 400, 145, 40);
+	Rect bRect = new Rect(810, 350, 145, 40);
+	Rect fRect = new Rect(810, 300, 145, 40);
 
 	Color oriColor;
 
+	bool pause = false;
+
+	int lol = 0;
 	void OnGUI()
 	{
+		if(pause) {
+			if(Input.GetMouseButtonDown(0)) {
+				pause = false;
+				Time.timeScale = 1;
+			}
+		}
+
 		GUI.skin.label.wordWrap = true;
+
+		oriColor = GUI.contentColor;
+		//For economy
+		GUI.Label(new Rect(810, 10, 120, 20), "$$: " + (int)curGold, goldStyle);
+		
+		//For showing lives left
+		GUI.Label(new Rect(810, 30, 120, 25), "Lifes: " + lifesRemaining, goldStyle);
+
+		//For waves
+		GUI.Label(new Rect(810, 50, 120, 25), "Wave " + (WaveHandler.Instance.curWave + 1) + " / " + WaveHandler.Instance.waves, goldStyle);
+
+		if(gameOver)
+			return;
+
+		if(!WaveHandler.amIRunning && !EAWaveHandler.amIRunning)
+			if(GUI.Button(new Rect(832, 75, 101, 25), "Start Wave")) {
+				WaveHandler.Instance.StartWaveHandler();
+			}
+
+		if(WaveHandler.amIRunning) {
+			if(!pause) {
+				if(GUI.Button(new Rect(832, 75, 101, 25), "Pause")) {
+					Time.timeScale = 0;
+					pause = true;
+				}
+			} else {
+				GUI.skin.box.wordWrap = true;
+				GUI.skin.box.fontStyle = FontStyle.Bold;
+				GUI.Box(new Rect(Screen.width / 2 - 75, Screen.height / 2 - 20, 150, 40), "Game is paused, press to continue");
+			}
+		}
+
+		if(EAWaveHandler.amIRunning) {
+			GUI.Label(new Rect(810, 70, 85, 25), "Evolving wave: " + ((float)EAWaveHandler.Instance.curGeneration / EAWaveHandler.Instance.generations * 100) + "%" ,goldStyle);
+		}
 
 		if(aRect.Contains(Input.mousePosition)) {
 			curT = arrowT;
@@ -286,44 +365,34 @@ public class InteractionHandler : MonoBehaviour {
 			showTowerStats = false;
 		}
 
-		oriColor = GUI.contentColor;
-		//For economy
-		GUI.Label(new Rect(810, 10, 120, 20), "$$: " + (int)curGold, goldStyle);
-		
-		//For showing lives left
-		GUI.Label(new Rect(810, 30, 120, 25), "Lifes: " + lifesRemaining, goldStyle);
-
-		//For waves
-		GUI.Label(new Rect(810, 50, 120, 25), "Wave " + (WaveHandler.Instance.curWave + 1) + " / " + WaveHandler.Instance.waves, goldStyle);
-
 		//Tower building buttons
 		if(curGold - arrowTowerCost >= 0) {
 			GUI.contentColor = Color.green;
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 80, 145, 40), "Arrow Tower")){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
+		if(GUI.Button(new Rect(810, 110, 145, 40), "Arrow Tower")){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
 
 		if(curGold - poisonTowerCost >= 0) {
 			GUI.contentColor = Color.green;
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 130, 145, 40), "Poison Tower")){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
+		if(GUI.Button(new Rect(810, 160, 145, 40), "Poison Tower")){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
 
 		if(curGold - bombTowerCost >= 0) {
 			GUI.contentColor = Color.green;
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 180, 145, 40), "Bomb Tower")){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
+		if(GUI.Button(new Rect(810, 210, 145, 40), "Bomb Tower")){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
 
 		if(curGold - frostTowerCost >= 0) {
 			GUI.contentColor = Color.green;
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 230, 145, 40), "Frost Tower")){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
+		if(GUI.Button(new Rect(810, 260, 145, 40), "Frost Tower")){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
 
 		if(towerSelected) {
 			Vector3 up = Camera.main.WorldToScreenPoint(curSelectedTower.transform.position);
@@ -340,7 +409,7 @@ public class InteractionHandler : MonoBehaviour {
 				GUI.contentColor = Color.red;
 			}
 
-			if(tmpTower.level % 4 != 0) {
+			if(tmpTower.level % 3 != 0) {
 				if(GUI.Button(new Rect(up.x - width / 2 - 25, Screen.height - up.y - offSetY - 20, width + 50, height + 20), "Upgrade for " + tmpTower.cost + ", gives \n 4*dmg and +specials")) {
 					if(curGold - tmpTower.cost >= 0) {
 						UpgradeTower();
@@ -355,17 +424,23 @@ public class InteractionHandler : MonoBehaviour {
 				switch(tmpTower.towerType) {
 				case TowerType.Arrow:
 					currentArrowTowers.Remove(tmpTower);
+					towerinfo += "S" + "A";
 					break;
 				case TowerType.Poison:
 					currentPoisonTowers.Remove(tmpTower);
+					towerinfo += "S" + "P";
 					break;
 				case TowerType.Bomb:
 					currentBombTowers.Remove(tmpTower);
+					towerinfo += "S" + "B";
 					break;
 				case TowerType.Frost:
 					currentFrostTowers.Remove(tmpTower);
+					towerinfo += "S" + "F";
 					break;
 				}
+
+				towerinfo += tmpTower.tileReplaced.name + "-";
 
 				curGold += (float)tmpTower.curNetWorth * 0.75f;
 				tmpTower.ResetTower();
