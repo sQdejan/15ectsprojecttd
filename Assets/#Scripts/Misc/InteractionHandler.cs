@@ -17,6 +17,7 @@ public class InteractionHandler : MonoBehaviour {
 	public LayerMask layersToHit; //For the unit selection interaction
 	public float startGold = 250;
 	public bool randomMode = false;
+	public GameObject infosheet;
 
 	public GameObject arrowTower;
 	public GameObject poisonTower;
@@ -32,7 +33,7 @@ public class InteractionHandler : MonoBehaviour {
 	public static int score = 0;
 
 	public static float curGold = 100;
-	public static int lifesRemaining = 900;
+	public static int lifesRemaining = 50;
 	public static bool gameOver = false;
 	public static List<Tower> currentArrowTowers = new List<Tower>();
 	public static List<Tower> currentPoisonTowers = new List<Tower>();
@@ -291,12 +292,13 @@ public class InteractionHandler : MonoBehaviour {
 
 	Rect aRect = new Rect(810, 450, 145, 40);
 	Rect pRect = new Rect(810, 400, 145, 40);
-	Rect bRect = new Rect(810, 350, 145, 40);
-	Rect fRect = new Rect(810, 300, 145, 40);
+	Rect fRect = new Rect(810, 350, 145, 40);
+	Rect bRect = new Rect(810, 300, 145, 40);
 
 	Color oriColor;
 
 	bool pause = false;
+	bool sheetActice = true;
 
 	int lol = 0;
 	void OnGUI()
@@ -305,6 +307,15 @@ public class InteractionHandler : MonoBehaviour {
 			if(Input.GetMouseButtonDown(0)) {
 				pause = false;
 				Time.timeScale = 1;
+			}
+		}
+
+		if(sheetActice) {
+			if(Input.GetMouseButtonDown(0)) {
+				sheetActice = false;
+				infosheet.SetActive(false);
+				if(!EAWaveHandler.amIRunning)
+					Time.timeScale = 1;
 			}
 		}
 
@@ -371,28 +382,28 @@ public class InteractionHandler : MonoBehaviour {
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 110, 145, 40), "Arrow Tower")){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
+		if(GUI.Button(new Rect(810, 110, 145, 40), "Arrow Tower - " + arrowTowerCost)){ if(curGold - arrowTowerCost >= 0) FindNextTower(arrowTowers); }
 
 		if(curGold - poisonTowerCost >= 0) {
 			GUI.contentColor = Color.green;
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 160, 145, 40), "Poison Tower")){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
-
-		if(curGold - bombTowerCost >= 0) {
-			GUI.contentColor = Color.green;
-		} else {
-			GUI.contentColor = Color.red;
-		}
-		if(GUI.Button(new Rect(810, 210, 145, 40), "Bomb Tower")){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
+		if(GUI.Button(new Rect(810, 160, 145, 40), "Poison Tower - " + poisonTowerCost)){ if(curGold - poisonTowerCost >= 0) FindNextTower(poisonTowers); }
 
 		if(curGold - frostTowerCost >= 0) {
 			GUI.contentColor = Color.green;
 		} else {
 			GUI.contentColor = Color.red;
 		}
-		if(GUI.Button(new Rect(810, 260, 145, 40), "Frost Tower")){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
+		if(GUI.Button(new Rect(810, 210, 145, 40), "Frost Tower - " + frostTowerCost)){ if(curGold - frostTowerCost >= 0) FindNextTower(frostTowers); }
+
+		if(curGold - bombTowerCost >= 0) {
+			GUI.contentColor = Color.green;
+		} else {
+			GUI.contentColor = Color.red;
+		}
+		if(GUI.Button(new Rect(810, 260, 145, 40), "Bomb Tower - " + bombTowerCost)){ if(curGold - bombTowerCost >= 0) FindNextTower(bombTowers); }
 
 		if(towerSelected) {
 			Vector3 up = Camera.main.WorldToScreenPoint(curSelectedTower.transform.position);
@@ -554,6 +565,14 @@ public class InteractionHandler : MonoBehaviour {
 				GUI.Label(new Rect(850, startPos + 131, 145, 100), (curT.slow * 100) + "% for 5s", normalStyle);
 				GUI.Label(new Rect(810, startPos + 149, 145, 100), curT.attackType + " Attacks:", goldStyle);
 				GUI.Label(new Rect(810, startPos + 162, 145, 100),  curT.aboutTower);
+			}
+		}
+		if(!sheetActice) {
+			if(GUI.Button(new Rect(831, 570, 101, 25), "Info Sheet")) {
+					sheetActice = true;
+					infosheet.SetActive(true);
+					if(!EAWaveHandler.amIRunning)
+						Time.timeScale = 0;
 			}
 		}
 	}
