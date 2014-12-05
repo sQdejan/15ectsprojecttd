@@ -224,10 +224,13 @@ public class Enemy : MonoBehaviour {
 	{
 		level++;
 
-//		if(level % 10 == 0) {
-//			bountyIncreaser *= 1.5f;
-//		}
-		curBounty += bountyIncreaser;
+		if(level % 5 == 0) {
+			bountyIncreaser *= 1.5f;
+		}	
+
+		if(level % 2 == 0) {
+			curBounty += bountyIncreaser;
+		}
 
 		if(level % PRILVL == 0) {
 			poisonResistance += PRI;
@@ -254,7 +257,7 @@ public class Enemy : MonoBehaviour {
 		switch (armorType) {
 		case ArmorType.LightArmor:
 			if(at == AttackType.Piercing) {
-				damage *= 1.75f;
+				damage *= 1.25f;
 			} else if (at == AttackType.Magic) {
 				damage *= 1.25f;
 			} else if (at == AttackType.Siege) {
@@ -264,7 +267,7 @@ public class Enemy : MonoBehaviour {
 
 		case ArmorType.MediumArmor:
 			if(at == AttackType.Normal) {
-				damage *= 1.5f;
+				damage *= 1.25f;
 			} else if (at == AttackType.Siege) {
 				damage *= 1.25f;
 			} else if (at == AttackType.Piercing) {
@@ -277,6 +280,8 @@ public class Enemy : MonoBehaviour {
 		case ArmorType.HeavyArmor:
 			if(at == AttackType.Magic) {
 				damage *= 1.75f;
+			} else if (at == AttackType.Siege) {
+				damage *= 1.25f;
 			} else if (at == AttackType.Normal) {
 				damage *= 0.75f;
 			} else if (at == AttackType.Piercing) {

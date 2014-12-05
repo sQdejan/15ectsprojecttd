@@ -33,7 +33,7 @@ public class InteractionHandler : MonoBehaviour {
 	public static int score = 0;
 
 	public static float curGold = 100;
-	public static int lifesRemaining = 30;
+	public static int lifesRemaining = 25;
 	public static bool gameOver = false;
 	public static List<Tower> currentArrowTowers = new List<Tower>();
 	public static List<Tower> currentPoisonTowers = new List<Tower>();

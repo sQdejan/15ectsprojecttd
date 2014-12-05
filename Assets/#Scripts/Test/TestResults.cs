@@ -98,7 +98,13 @@ public class TestResults : MonoBehaviour {
 
 		url = url.Replace("%0", InteractionHandler.playerID.ToString());
 		url = url.Replace("%2", WaveHandler.score.ToString());
-		url = url.Replace("%3", (WaveHandler.Instance.curWave + 1).ToString());
+
+		if(WaveHandler.wonGame) {
+			url = url.Replace("%3", (WaveHandler.Instance.curWave + InteractionHandler.lifesRemaining).ToString());
+		} else {
+			url = url.Replace("%3", (WaveHandler.Instance.curWave + 1).ToString());
+		}
+
 		url = url.Replace("%4", InteractionHandler.towerinfo);
 		url = url.Replace("%5", WaveHandler.waveinfo);
 		url = url.Replace("%6", enjoyment.ToString());

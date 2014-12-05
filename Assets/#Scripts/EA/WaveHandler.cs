@@ -21,6 +21,7 @@ public class WaveHandler : MonoBehaviour {
 	public static int enemiesDone = 0; 
 	public static EAWaveGenome genome;
 	public static bool amIRunning = false;
+	public static bool wonGame = false;
 
 	public static string waveinfo = "";
 	public static int score = 0;
@@ -89,6 +90,7 @@ public class WaveHandler : MonoBehaviour {
 				amIRunning = false;
 				EAWaveHandler.Instance.StartEAProcess();
 			} else {
+				wonGame = true;
 				curWave--;
 				InteractionHandler.gameOver = true;
 				amIRunning = false;
