@@ -116,7 +116,7 @@ public class EAWaveHandler : MonoBehaviour {
 				EvaluateGeneration();
 
 				if(++curGeneration > generations) {
-//					Debug.Log(Time.realtimeSinceStartup - time);
+					Debug.Log(Time.realtimeSinceStartup - time);
 					Time.timeScale = 1;
 					curGeneration = 1;
 					amIRunning = false;
@@ -141,15 +141,14 @@ public class EAWaveHandler : MonoBehaviour {
 
 	public void StartEAProcess()
 	{
+		time = Time.realtimeSinceStartup;
 		amIRunning = true;
 		gameObject.SetActive(true);
 		if(InteractionHandler.mode == "E") {
-			Debug.Log("Entering normal mode");
 			SetupTowers();
 			Time.timeScale = 100;
 			StartCoroutine(SpawnWaves());
 		} else {
-			Debug.Log("Entering random mode");
 			StartCoroutine(RandomMode());
 		}
 	}

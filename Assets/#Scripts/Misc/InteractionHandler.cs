@@ -33,7 +33,7 @@ public class InteractionHandler : MonoBehaviour {
 	public static int score = 0;
 
 	public static float curGold = 100;
-	public static int lifesRemaining = 50;
+	public static int lifesRemaining = 30;
 	public static bool gameOver = false;
 	public static List<Tower> currentArrowTowers = new List<Tower>();
 	public static List<Tower> currentPoisonTowers = new List<Tower>();
@@ -233,7 +233,7 @@ public class InteractionHandler : MonoBehaviour {
 		tmpTower.level++;
 		tmpTower.damage *= 4f;
 		tmpTower.dotDamage *= 4f;
-		tmpTower.slow += 0.1f;
+		tmpTower.slow += 0.2f;
 		tmpTower.curNetWorth += tmpTower.cost;
 		curGold -= tmpTower.cost;
 		tmpTower.cost *= 3f;

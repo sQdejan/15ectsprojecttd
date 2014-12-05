@@ -19,7 +19,6 @@ public class WaveHandler : MonoBehaviour {
 	public int curWave = 0;
 	
 	public static int enemiesDone = 0; 
-	public static float damageTaken = 0;
 	public static EAWaveGenome genome;
 	public static bool amIRunning = false;
 
@@ -78,8 +77,6 @@ public class WaveHandler : MonoBehaviour {
 		}
 
 		if(enemiesDone >= waveSize) {
-			score += (int)(damageTaken / waveMaxHealth * 100);
-			damageTaken = 0;
 			enemiesDone = 0;
 			if(++curWave < waves) {
 				foreach(Enemy e in warriors) { e.LevelUp(); }
@@ -111,7 +108,12 @@ public class WaveHandler : MonoBehaviour {
 	void CreateGenomeString()
 	{
 		for(int i = 0; i < genome.Chromosome.Length; i++) {
-			waveinfo += genome.Chromosome[i].ToString() + ",";
+			if(i > 3) {
+				if(genome.Chromosome[i] < 10) {
+					waveinfo += "0";
+				}
+			}
+			waveinfo += genome.Chromosome[i].ToString();
 		}
 
 		waveinfo += "-";

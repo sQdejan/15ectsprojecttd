@@ -224,9 +224,9 @@ public class Enemy : MonoBehaviour {
 	{
 		level++;
 
-		if(level % 10 == 0) {
-			bountyIncreaser *= 1.5f;
-		}
+//		if(level % 10 == 0) {
+//			bountyIncreaser *= 1.5f;
+//		}
 		curBounty += bountyIncreaser;
 
 		if(level % PRILVL == 0) {
@@ -294,16 +294,14 @@ public class Enemy : MonoBehaviour {
 
 		if(amIEA){
 			EAWaveHandler.totalDamageTaken += damage;
-		} else {
-			WaveHandler.damageTaken += damage;
-		}
+		} 
 
 		if(health <= 0) {
 			if(amIEA) {
 				EAWaveHandler.totalDamageTaken += health;
 				EAWaveHandler.enemiesDied++;
 			} else {
-				WaveHandler.damageTaken += health;
+				WaveHandler.score += 10;
 				Bounty();
 			}
 
@@ -333,17 +331,17 @@ public class Enemy : MonoBehaviour {
 		for(int i = 0; i < 5; i++) {
 			dotDamage *= 1f - ((poisonResistance * 0.06f) / (1f + poisonResistance * 0.06f));
 			health -= dotDamage;
+
 			if(amIEA){
 				EAWaveHandler.totalDamageTaken += dotDamage;
-			} else {
-				WaveHandler.damageTaken += dotDamage;
 			}
+
 			if(health <= 0) {
 				if(amIEA) {
 					EAWaveHandler.totalDamageTaken += health;
 					EAWaveHandler.enemiesDied++;
 				} else {
-					WaveHandler.damageTaken += health;
+					WaveHandler.score += 10;
 					Bounty ();
 				}
 				Terminate();
