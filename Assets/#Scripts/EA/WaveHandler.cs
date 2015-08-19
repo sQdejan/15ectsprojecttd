@@ -101,7 +101,7 @@ public class WaveHandler : MonoBehaviour {
 	public void StartWaveHandler()
 	{
 		CreateGenomeString();
-		TestResults.Instance.UpdateResults();
+//		TestResults.Instance.UpdateResults();
 //		StartCoroutine(WaveWaiting());
 		amIRunning = true;
 		StartCoroutine("SpawnWaves");

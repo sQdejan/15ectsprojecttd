@@ -33,7 +33,7 @@ public class InteractionHandler : MonoBehaviour {
 	public static int score = 0;
 
 	public static float curGold = 100;
-	public static int lifesRemaining = 1000;
+	public static int lifesRemaining = 25;
 	public static bool gameOver = false;
 	public static List<Tower> currentArrowTowers = new List<Tower>();
 	public static List<Tower> currentPoisonTowers = new List<Tower>();
@@ -86,7 +86,7 @@ public class InteractionHandler : MonoBehaviour {
 			mode = "E";
 		}
 
-		TestResults.Instance.SendStart();
+//		TestResults.Instance.SendStart();
 
 		InteractionHandler.curGold = startGold;
 
@@ -330,8 +330,10 @@ public class InteractionHandler : MonoBehaviour {
 		//For waves
 		GUI.Label(new Rect(810, 50, 120, 25), "Wave " + (WaveHandler.Instance.curWave + 1) + " / " + WaveHandler.Instance.waves, goldStyle);
 
-		if(gameOver)
+		if(gameOver) {
+			GUI.Label(new Rect(Screen.width/ 2 - 100, Screen.height / 2 - 30, 200, 60), "Game is over, refresh to try again.", goldStyle);
 			return;
+		}
 
 		if(!WaveHandler.amIRunning && !EAWaveHandler.amIRunning)
 			if(GUI.Button(new Rect(832, 75, 101, 25), "Start Wave")) {

@@ -281,6 +281,8 @@ public class EAWaveHandler : MonoBehaviour {
 			return g2.totalFitness.CompareTo(g1.totalFitness);
 		});
 
+		Debug.Log(population[0].totalFitness);
+
 //		string sorted = "";
 //
 //		for(int i = 0; i < population.Length; i++) {
